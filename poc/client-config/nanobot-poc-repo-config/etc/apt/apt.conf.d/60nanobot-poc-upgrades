@@ -1,0 +1,25 @@
+// Nanobot POC: Unattended-upgrades configuration
+// Only auto-upgrade nanobot packages from the POC repository.
+// Does NOT affect system Ubuntu packages.
+
+Unattended-Upgrade::Allowed-Origins {
+    "Lenovo:noble";
+};
+
+// Whitelist: only packages matching these regexes are candidates for upgrade.
+// NOTE: unattended-upgrades' whitelist is "not strict" — a non-matching
+// package is *not* excluded unless it is also on the blacklist below.
+Unattended-Upgrade::Package-Whitelist {
+    "^nanobot$";
+    "^nanobot-.*";
+};
+
+// Blacklist: explicitly block the non-nanobot POC test packages so the
+// "not strict" whitelist above actually takes effect (see validation Case 17).
+Unattended-Upgrade::Package-Blacklist {
+    "unrelated-poc";
+    "random-test-poc";
+};
+
+Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+Unattended-Upgrade::MinimalSteps "true";

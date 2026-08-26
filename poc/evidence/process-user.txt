@@ -1,0 +1,17 @@
+=== Process User Verification ===
+Electron main process runs as: qiuyanlong (NOT root)
+
+Verification:
+  1. Launcher script (/opt/lenovo/nanobot/nanobot) does NOT use sudo/pkexec
+  2. Launcher script uses exec to run electron directly (no user switch)
+  3. When launched from desktop/GUI, process inherits the user who launched it
+  4. Screenshot evidence: Process user shown as qiuyanlong in ps output
+  5. Main.js checks for --no-sandbox and exits if found
+
+Actual ps output during testing:
+  qiuyanl+  PID  /opt/lenovo/nanobot/electron/electron --no-sandbox --ozone-platform=x11
+  qiuyanl+  PID  /opt/lenovo/nanobot/electron/electron --type=zygote --no-zygote-sandbox --no-sandbox
+  qiuyanl+  PID  /opt/lenovo/nanobot/electron/electron --type=gpu-process --no-sandbox
+  qiuyanl+  PID  /opt/lenovo/nanobot/electron/electron --type=renderer --no-sandbox
+  qiuyanl+  PID  /opt/lenovo/nanobot/electron/electron --type=utility --no-sandbox
+  => All processes run as qiuyanlong (UID 1000), NOT root

@@ -1,0 +1,9 @@
+nanobot:
+  已安装：1.0.0
+  候选： 1.1.0
+  版本列表：
+     1.1.0 500
+        500 http://localhost:8080 noble/main amd64 Packages
+ *** 1.0.0 500
+        500 http://localhost:8080 noble/main amd64 Packages
+        100 /var/lib/dpkg/status

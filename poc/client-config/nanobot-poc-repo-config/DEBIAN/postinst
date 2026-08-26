@@ -1,0 +1,15 @@
+#!/bin/bash
+set -e
+
+# Ensure the APT sources list directory exists
+mkdir -p /etc/apt/sources.list.d
+
+# Copy the repository public key to the system keyring
+if [ -f /usr/share/keyrings/nanobot-poc.gpg ]; then
+  chmod 0644 /usr/share/keyrings/nanobot-poc.gpg
+fi
+
+# Log configuration
+logger -t nanobot-poc-repo-config "POC repository configuration installed"
+
+exit 0

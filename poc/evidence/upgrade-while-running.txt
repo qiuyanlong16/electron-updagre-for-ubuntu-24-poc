@@ -1,0 +1,15 @@
+=== Upgrade-While-Running Test Evidence ===
+
+Test Procedure:
+  1. Launched nanobot v1.0.0 (PID tracked)
+  2. Took screenshot (confirmed v1.0.0 display)
+  3. Triggered apt-get install nanobot (upgrade to 1.1.0)
+  4. Checked if app PID still alive after upgrade
+
+Result:
+  - App remained running after upgrade (PID still alive)
+  - Window still displayed content (screenshot confirmed)
+  - After restart, new version 1.1.0 was displayed
+
+Note: dpkg replaces the binary files on disk but does NOT kill running processes.
+The running process continues using the in-memory binary until restarted.

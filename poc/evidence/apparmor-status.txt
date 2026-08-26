@@ -1,0 +1,5 @@
+# AppArmor profile for Nanobot Electron application
+# Path: /etc/apparmor.d/com.lenovo.nanobot
+#
+# This profile enforces sandbox mode for the Electron app,
+# prevents privilege escalation, and confines the application

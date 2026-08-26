@@ -1,0 +1,58 @@
+#include <tunables/global>
+
+/opt/lenovo/nanobot/electron/electron {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <abstractions/bash>
+
+  userns,
+  capability sys_admin,
+  capability sys_chroot,
+  capability dac_read_search,
+  capability setuid,
+  capability setgid,
+  capability fowner,
+  capability chown,
+
+  deny /proc/sys/kernel/unprivileged_userns_clone w,
+
+  /opt/lenovo/nanobot/                 r,
+  /opt/lenovo/nanobot/**               r,
+  /opt/lenovo/nanobot/electron/electron mrpix,
+  /usr/bin/bash                        mix,
+  /bin/bash                            mix,
+  /usr/bin/env                         mix,
+  /opt/lenovo/nanobot/electron/*.so    mrwix,
+  /opt/lenovo/nanobot/electron/locales/** r,
+  /opt/lenovo/nanobot/electron/**      r,
+  /opt/lenovo/nanobot/electron/chrome-sandbox mrwix,
+  /opt/lenovo/nanobot/electron/chrome_crashpad_handler mrpix,
+  /usr/lib/x86_64-linux-gnu/**         r,
+  /usr/lib/**                          r,
+  /usr/share/**                        r,
+  /lib/x86_64-linux-gnu/**             r,
+  /lib/**                              r,
+  /etc/**                              r,
+  /dev/null                            rw,
+  /dev/zero                            rw,
+  /dev/random                          r,
+  /dev/urandom                         r,
+  /dev/tty                             rw,
+  /dev/dri/**                          rw,
+  /proc/                               r,
+  /proc/**                             r,
+  /proc/[0-9]*/**                      rw,
+  /proc/[0-9]*/setgroups               rw,
+  /proc/[0-9]*/uid_map                 rw,
+  /proc/[0-9]*/gid_map                 rw,
+  /sys/**                              r,
+  /sys/fs/cgroup/**                    r,
+  owner @{HOME}/.config/nanobot/**     rw,
+  owner @{HOME}/.cache/nanobot/**      rw,
+  owner /tmp/**                        rw,
+  /dev/shm/**                      rw,
+  network inet  stream,
+  /dev/shm/**                      rw,
+  network inet6 stream,
+  network unix   stream,
+}

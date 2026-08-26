@@ -1,0 +1,65 @@
+=== Case 17 evidence: Selective upgrade ===
+Timestamp: Mon Aug 24 22:58:40 CST 2026
+
+--- Installed versions ---
+nanobot	1.1.0
+unrelated-poc	1.0.0
+
+--- unattended-upgrades config ---
+// Nanobot POC: Unattended-upgrades configuration
+// Only auto-upgrade nanobot packages from the POC repository.
+// Does NOT affect system Ubuntu packages.
+
+Unattended-Upgrade::Allowed-Origins {
+    "Lenovo:noble";
+};
+
+// Blacklist all non-nanobot packages from the POC repo
+Unattended-Upgrade::Package-Blacklist {
+    "unrelated-poc";
+};
+
+Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+Unattended-Upgrade::MinimalSteps "true";
+
+--- unattended-upgrades log (last 15 lines) ---
+2026-08-24 22:56:05,696 INFO 初始黑名单：unrelated-poc
+2026-08-24 22:56:05,696 INFO 初始白名单（not strict）：
+2026-08-24 22:56:09,015 INFO Option --dry-run given, *not* performing real actions
+2026-08-24 22:56:09,015 INFO 将要升级的软件包：nanobot
+2026-08-24 22:56:09,015 INFO Writing dpkg log to /var/log/unattended-upgrades/unattended-upgrades-dpkg.log
+2026-08-24 22:56:10,261 INFO 安装了所有的更新
+2026-08-24 22:56:10,486 INFO 在试运行模式下无法计算保留的软件包列表。
+2026-08-24 22:57:57,656 INFO 启动无人照管的更新脚本
+2026-08-24 22:57:57,657 INFO 允许的源：o=Ubuntu,a=noble, o=Ubuntu,a=noble-security, o=UbuntuESMApps,a=noble-apps-security, o=UbuntuESM,a=noble-infra-security, o=Lenovo,a=noble
+2026-08-24 22:57:57,657 INFO 初始黑名单：unrelated-poc
+2026-08-24 22:57:57,657 INFO 初始白名单（not strict）：
+2026-08-24 22:58:00,539 INFO 将要升级的软件包：nanobot
+2026-08-24 22:58:00,539 INFO Writing dpkg log to /var/log/unattended-upgrades/unattended-upgrades-dpkg.log
+2026-08-24 22:58:04,532 INFO 安装了所有的更新
+2026-08-24 22:58:04,861 INFO 软件包 unrelated-poc 已被列入黑名单。
+
+--- journalctl output ---
+Aug 24 22:55:56 qiuyanlong-VMware-Virtual-Platform systemd[1]: Starting nanobot-poc-upgrade.service - Nanobot POC Auto-Upgrade Service (2-minute timer)...
+Aug 24 22:55:56 qiuyanlong-VMware-Virtual-Platform systemd[1]: nanobot-poc-upgrade.service: Skipped due to 'exec-condition'.
+Aug 24 22:55:56 qiuyanlong-VMware-Virtual-Platform systemd[1]: Condition check resulted in nanobot-poc-upgrade.service - Nanobot POC Auto-Upgrade Service (2-minute timer) being skipped.
+Aug 24 22:57:57 qiuyanlong-VMware-Virtual-Platform systemd[1]: Starting nanobot-poc-upgrade.service - Nanobot POC Auto-Upgrade Service (2-minute timer)...
+Aug 24 22:57:57 qiuyanlong-VMware-Virtual-Platform unattended-upgrade[73413]: 启动无人照管的更新脚本
+Aug 24 22:57:57 qiuyanlong-VMware-Virtual-Platform unattended-upgrade[73413]: 允许的源：o=Ubuntu,a=noble, o=Ubuntu,a=noble-security, o=UbuntuESMApps,a=noble-apps-security, o=UbuntuESM,a=noble-infra-security, o=Lenovo,a=noble
+Aug 24 22:57:57 qiuyanlong-VMware-Virtual-Platform unattended-upgrade[73413]: 初始黑名单：unrelated-poc
+Aug 24 22:57:57 qiuyanlong-VMware-Virtual-Platform unattended-upgrade[73413]: 初始白名单（not strict）：
+Aug 24 22:58:00 qiuyanlong-VMware-Virtual-Platform unattended-upgrade[73413]: 将要升级的软件包：nanobot
+Aug 24 22:58:00 qiuyanlong-VMware-Virtual-Platform unattended-upgrade[73413]: Writing dpkg log to /var/log/unattended-upgrades/unattended-upgrades-dpkg.log
+Aug 24 22:58:00 qiuyanlong-VMware-Virtual-Platform unattended-upgrade[73413]: /usr/bin/unattended-upgrade:567: DeprecationWarning: This process (pid=73413) is multi-threaded, use of fork() may lead to deadlocks in the child.
+Aug 24 22:58:00 qiuyanlong-VMware-Virtual-Platform unattended-upgrade[73413]:   pid = os.fork()
+Aug 24 22:58:01 qiuyanlong-VMware-Virtual-Platform unattended-upgrade[73413]: [729B blob data]
+Aug 24 22:58:01 qiuyanlong-VMware-Virtual-Platform unattended-upgrade[73413]: 准备解压 .../nanobot_1.1.0_amd64.deb  ...
+Aug 24 22:58:01 qiuyanlong-VMware-Virtual-Platform nanobot[73507]: Nanobot prerm executed
+Aug 24 22:58:01 qiuyanlong-VMware-Virtual-Platform unattended-upgrade[73413]: 正在解压 nanobot (1.1.0) 并覆盖 (1.0.0) ...
+Aug 24 22:58:02 qiuyanlong-VMware-Virtual-Platform unattended-upgrade[73413]: 正在设置 nanobot (1.1.0) ...
+Aug 24 22:58:02 qiuyanlong-VMware-Virtual-Platform nanobot[73752]: Nanobot  installed successfully
+Aug 24 22:58:04 qiuyanlong-VMware-Virtual-Platform unattended-upgrade[73413]: 安装了所有的更新
+Aug 24 22:58:04 qiuyanlong-VMware-Virtual-Platform unattended-upgrade[73413]: 软件包 unrelated-poc 已被列入黑名单。
+Aug 24 22:58:04 qiuyanlong-VMware-Virtual-Platform systemd[1]: nanobot-poc-upgrade.service: Deactivated successfully.
+Aug 24 22:58:04 qiuyanlong-VMware-Virtual-Platform systemd[1]: Finished nanobot-poc-upgrade.service - Nanobot POC Auto-Upgrade Service (2-minute timer).
+Aug 24 22:58:04 qiuyanlong-VMware-Virtual-Platform systemd[1]: nanobot-poc-upgrade.service: Consumed 7.177s CPU time, 420.6M memory peak, 0B memory swap peak.

@@ -1,0 +1,10 @@
+总计 36
+drwxrwxr-x 3 root root 4096 Aug 24 18:39 .
+drwxrwxr-x 3 root root 4096 Aug 24 18:39 ..
+drwxrwxr-x 4 root root 4096 Aug 24 18:39 electron
+-rw-rw-r-- 1 root root 1808 Aug 24 18:38 index.html
+-rw-rw-r-- 1 root root 1131 Aug 24 18:38 main.js
+-rwxr-xr-x 1 root root  244 Aug 24 18:38 nanobot
+-rw-rw-r-- 1 root root  217 Aug 24 18:38 package.json
+-rw-rw-r-- 1 root root  241 Aug 24 18:38 preload.js
+-rw-rw-r-- 1 root root  615 Aug 24 18:38 renderer.js

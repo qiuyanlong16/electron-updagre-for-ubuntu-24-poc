@@ -1,0 +1,7 @@
+● nanobot-poc-upgrade.timer - Nanobot POC Auto-Upgrade Timer (every 2 minutes)
+     Loaded: loaded (/etc/systemd/system/nanobot-poc-upgrade.timer; enabled; preset: enabled)
+     Active: active (waiting) since Mon 2026-08-24 18:42:08 CST; 15ms ago
+    Trigger: Mon 2026-08-24 18:44:08 CST; 1min 59s left
+   Triggers: ● nanobot-poc-upgrade.service
+
+Aug 24 18:42:08 qiuyanlong-VMware-Virtual-Platform systemd[1]: Started nanobot-poc-upgrade.timer - Nanobot POC Auto-Upgrade Timer (every 2 minutes).

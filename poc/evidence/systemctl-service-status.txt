@@ -1,0 +1,12 @@
+○ nanobot-poc-upgrade.service - Nanobot POC Auto-Upgrade Service (2-minute timer)
+     Loaded: loaded (/etc/systemd/system/nanobot-poc-upgrade.service; static)
+     Active: inactive (dead) (Result: exec-condition) since Mon 2026-08-24 18:42:08 CST; 30ms ago
+TriggeredBy: ● nanobot-poc-upgrade.timer
+  Condition: start condition unmet at Mon 2026-08-24 18:42:08 CST; 39ms ago
+       Docs: file:///home/qiuyanlong/worespace/by-claw-poc-linux/poc/README.md
+    Process: 48891 ExecCondition=/usr/bin/test ! -f /var/lib/dpkg/lock-frontend (code=exited, status=1/FAILURE)
+        CPU: 2ms
+
+Aug 24 18:42:08 qiuyanlong-VMware-Virtual-Platform systemd[1]: Starting nanobot-poc-upgrade.service - Nanobot POC Auto-Upgrade Service (2-minute timer)...
+Aug 24 18:42:08 qiuyanlong-VMware-Virtual-Platform systemd[1]: nanobot-poc-upgrade.service: Skipped due to 'exec-condition'.
+Aug 24 18:42:08 qiuyanlong-VMware-Virtual-Platform systemd[1]: Condition check resulted in nanobot-poc-upgrade.service - Nanobot POC Auto-Upgrade Service (2-minute timer) being skipped.

@@ -1,0 +1,6 @@
+  userns,
+  deny /opt/lenovo/nanobot/nanobot UXr --no-sandbox,
+  deny /opt/lenovo/nanobot/nanobot mrUX --no-sandbox,
+  # FORBIDDEN: Do not allow global userns bypass
+  # Writing to kernel.unprivileged_userns_clone would
+  deny /proc/sys/kernel/unprivileged_userns_clone w,

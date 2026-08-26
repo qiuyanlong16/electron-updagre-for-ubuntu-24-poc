@@ -1,0 +1,7 @@
+# This directory holds the local APT repository's generated state.
+# setup-repo.sh creates:
+#   gpg-home/                     ← throwaway GPG key pair (PRIVATE — gitignored)
+#   aptly.conf                    ← generated aptly config (gitignored)
+#   nanobot-poc-public.gpg        ← exported public key (gitignored)
+# Keep this placeholder so the directory exists right after `git clone`,
+# because setup-repo.sh writes gpg-home/ here.

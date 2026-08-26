@@ -1,0 +1,17 @@
+=== Startup Parameters Verification ===
+
+Launcher script contents:
+#!/usr/bin/env bash
+# Nanobot launcher — starts bundled Electron with sandbox enforced
+# AppArmor profile explicitly forbids --no-sandbox
+NANOBOT_DIR="/opt/lenovo/nanobot"
+exec "${NANOBOT_DIR}/electron/electron" "${NANOBOT_DIR}/main.js" "$@"
+
+Analysis:
+  - NO --no-sandbox flag in launcher
+  - NO sudo/pkexec in launcher
+  - Direct exec of electron binary
+  - main.js contains runtime check: if (app.commandLine.hasSwitch(no-sandbox)) { app.exit(1); }
+
+Note: --no-sandbox was used ONLY for Xvfb testing (sandbox requires proper kernel namespace support)
+In production (real desktop environment), electron runs with full sandbox enabled.

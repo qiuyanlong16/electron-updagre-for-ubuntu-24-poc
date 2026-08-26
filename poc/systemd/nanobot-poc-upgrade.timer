@@ -1,0 +1,11 @@
+[Unit]
+Description=Nanobot POC Auto-Upgrade Timer (every 2 minutes)
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=2min
+AccuracySec=10s
+Unit=nanobot-poc-upgrade.service
+
+[Install]
+WantedBy=timers.target

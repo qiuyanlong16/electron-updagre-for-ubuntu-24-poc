@@ -1,0 +1,57 @@
+# AppArmor profile for Nanobot launcher
+# Path: /etc/apparmor.d/com.lenovo.nanobot
+
+#include <tunables/global>
+
+/opt/lenovo/nanobot/nanobot {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <abstractions/bash>
+
+  userns,
+  capability sys_admin,
+
+  deny /proc/sys/kernel/unprivileged_userns_clone w,
+
+  /opt/lenovo/nanobot/                 r,
+  /opt/lenovo/nanobot/**               r,
+  /opt/lenovo/nanobot/nanobot          mrpix,
+
+  /usr/bin/bash                        mix,
+  /bin/bash                            mix,
+  /usr/bin/env                         mix,
+  /opt/lenovo/nanobot/electron/electron Px,
+
+  /opt/lenovo/nanobot/electron/*.so    mrwix,
+  /opt/lenovo/nanobot/electron/locales/** r,
+  /opt/lenovo/nanobot/electron/**      r,
+  /opt/lenovo/nanobot/electron/chrome-sandbox mrwix,
+  /opt/lenovo/nanobot/electron/chrome_crashpad_handler mrpix,
+
+  /usr/lib/x86_64-linux-gnu/**         r,
+  /usr/lib/**                          r,
+  /usr/share/**                        r,
+  /lib/x86_64-linux-gnu/**             r,
+  /lib/**                              r,
+  /etc/**                              r,
+  /dev/null                            rw,
+  /dev/zero                            rw,
+  /dev/random                          r,
+  /dev/urandom                         r,
+  /dev/tty                             rw,
+  /dev/dri/**                          rw,
+  /proc/                               r,
+  /proc/**                             r,
+  /proc/[0-9]*/**                      rw,
+  /proc/[0-9]*/setgroups               rw,
+  /proc/[0-9]*/uid_map                 rw,
+  /proc/[0-9]*/gid_map                rw,
+  /sys/**                              r,
+  /sys/fs/cgroup/**                    r,
+  owner @{HOME}/.config/nanobot/**     rw,
+  owner @{HOME}/.cache/nanobot/**      rw,
+  owner /tmp/**                        rw,
+  network inet  stream,
+  network inet6 stream,
+  network unix   stream,
+}

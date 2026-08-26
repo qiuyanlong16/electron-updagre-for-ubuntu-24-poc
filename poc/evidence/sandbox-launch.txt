@@ -1,0 +1,29 @@
+=== Sandbox launch evidence ===
+Timestamp: Tue Aug 25 11:01:33 CST 2026
+
+--- Process listing ---
+root       79285 sudo -S runuser -u nanobot-testuser -- bash /opt/lenovo/nanobot/nanobot
+root       79287 runuser -u nanobot-testuser -- bash /opt/lenovo/nanobot/nanobot
+nanobot+   79288 /opt/lenovo/nanobot/electron/electron
+nanobot+   79291 /opt/lenovo/nanobot/electron/electron --type=zygote --no-zygote-sandbox
+nanobot+   79292 /opt/lenovo/nanobot/electron/electron --type=zygote
+nanobot+   79294 /opt/lenovo/nanobot/electron/electron --type=zygote
+nanobot+   79319 /opt/lenovo/nanobot/electron/electron --type=gpu-process --ozone-platform=x11 --enable-crash-reporter=d120ce4e-5a06-4604-99e5-5560138f730b,no_channel --user-data-dir=/home/nanobot-testuser/.config/nanobot --gpu-preferences=WAAAAAAAAAAgAQAEAAAAAAAAAAAAAGAAQAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAABAAAAAAAAAAgAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --shared-files --field-trial-handle=3,i,7252995206284199081,6571731259896429101,262144 --enable-features=GlobalShortcutsPortalPreferredTrigger,PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=7,i,8300878041228733355,5329630460773499251,4 --trace-proces
+nanobot+   79322 /opt/lenovo/nanobot/electron/electron --type=utility --utility-sub-type=network.mojom.NetworkService --lang=zh-CN --service-sandbox-type=none --enable-crash-reporter=d120ce4e-5a06-4604-99e5-5560138f730b,no_channel --user-data-dir=/home/nanobot-testuser/.config/nanobot --enable-sandbox --shared-files=v8_context_snapshot_data:100 --field-trial-handle=3,i,7252995206284199081,6571731259896429101,262144 --enable-features=GlobalShortcutsPortalPreferredTrigger,PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=7,i,8300878041228733355,5329630460773499251,4 --trace-process-track-uuid=3190708989122997041
+nanobot+   79335 /opt/lenovo/nanobot/electron/electron --type=renderer --enable-crash-reporter=d120ce4e-5a06-4604-99e5-5560138f730b,no_channel --user-data-dir=/home/nanobot-testuser/.config/nanobot --enable-sandbox --app-path=/opt/lenovo/nanobot/electron/resources/app --enable-sandbox --ozone-platform=x11 --lang=zh-CN --num-raster-threads=2 --enable-main-frame-before-activation --renderer-client-id=4 --time-ticks-at-unix-epoch=-1787439372683272 --launch-time-ticks=187494051627 --shared-files=v8_context_snapshot_data:100 --field-trial-handle=3,i,7252995206284199081,6571731259896429101,262144 --enable-features=GlobalShortcutsPortalPreferredTrigger,PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TraceSiteInstanceGetProcessCreation --variations-seed-v
+nanobot+   79345 /opt/lenovo/nanobot/electron/electron --type=broker
+
+--- AppArmor status ---
+   /opt/lenovo/nanobot/electron/electron
+   /opt/lenovo/nanobot/nanobot
+   /opt/lenovo/nanobot/electron/electron (79288) 
+   /opt/lenovo/nanobot/electron/electron (79291) 
+   /opt/lenovo/nanobot/electron/electron (79292) 
+   /opt/lenovo/nanobot/electron/electron (79294) 
+   /opt/lenovo/nanobot/electron/electron (79319) 
+   /opt/lenovo/nanobot/electron/electron (79322) 
+   /opt/lenovo/nanobot/electron/electron (79335) 
+   /opt/lenovo/nanobot/electron/electron (79345) 
+
+--- Chrome sandbox ---
+root root 4755 /opt/lenovo/nanobot/electron/chrome-sandbox

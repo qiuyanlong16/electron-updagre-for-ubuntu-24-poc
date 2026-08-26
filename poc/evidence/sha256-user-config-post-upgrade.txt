@@ -1,0 +1,2 @@
+c16321a94b81463cb8fdce76d4a7552dfb2a2eff1ccc669b8adc9b966e81cf43  /home/nanobot-testuser/.config/nanobot/settings.json
+3da1cb892a37c10104105a74e0b57df4788b95c7f67f0554382f344a79d7e9bb  /home/nanobot-testuser/.config/nanobot/model-simulation.txt

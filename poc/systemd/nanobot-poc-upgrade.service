@@ -1,0 +1,13 @@
+[Unit]
+Description=Nanobot POC Auto-Upgrade Service (2-minute timer)
+Documentation=https://github.com/qiuyanlong16/electron-updagre-for-ubuntu-24-poc
+
+[Service]
+Type=oneshot
+# NOTE: do NOT gate this on /var/lib/dpkg/lock-frontend. That file persists on
+# disk (dpkg uses advisory flock, not file existence), so `test ! -f` would be
+# false every time and the service would silently skip every upgrade.
+# APT/dpkg handle lock contention themselves.
+ExecStart=/usr/bin/unattended-upgrade -v
+Nice=19
+IOSchedulingClass=idle

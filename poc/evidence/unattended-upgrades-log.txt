@@ -1,0 +1,20 @@
+2026-08-24 06:34:52,377 INFO Writing dpkg log to /var/log/unattended-upgrades/unattended-upgrades-dpkg.log
+2026-08-24 06:36:47,768 INFO 安装了所有的更新
+2026-08-24 06:37:01,676 INFO 成功自动删除的包：linux-headers-6.17.0-35-generic linux-hwe-6.17-headers-6.17.0-35 linux-hwe-6.17-tools-6.17.0-35 linux-image-6.17.0-35-generic linux-modules-6.17.0-35-generic linux-modules-extra-6.17.0-35-generic linux-tools-6.17.0-35-generic
+2026-08-24 06:37:01,676 INFO Packages that are kept back: 
+2026-08-24 11:07:02,090 INFO 启动无人照管的更新脚本
+2026-08-24 11:07:02,090 INFO 允许的源：o=Ubuntu,a=noble, o=Ubuntu,a=noble-security, o=UbuntuESMApps,a=noble-apps-security, o=UbuntuESM,a=noble-infra-security
+2026-08-24 11:07:02,090 INFO 初始黑名单：
+2026-08-24 11:07:02,090 INFO 初始白名单（not strict）：
+2026-08-24 18:47:57,158 INFO 启动无人照管的更新脚本
+2026-08-24 18:47:57,159 INFO 允许的源：o=Ubuntu,a=noble, o=Ubuntu,a=noble-security, o=UbuntuESMApps,a=noble-apps-security, o=UbuntuESM,a=noble-infra-security, o=. noble,a=noble
+2026-08-24 18:47:57,159 INFO 初始黑名单：
+2026-08-24 18:47:57,159 INFO 初始白名单（not strict）：
+2026-08-24 18:48:00,080 INFO 将要升级的软件包：nanobot
+2026-08-24 18:48:00,080 INFO Writing dpkg log to /var/log/unattended-upgrades/unattended-upgrades-dpkg.log
+2026-08-24 18:48:03,791 INFO 安装了所有的更新
+2026-08-24 18:48:16,097 INFO 启动无人照管的更新脚本
+2026-08-24 18:48:16,097 INFO 允许的源：o=Ubuntu,a=noble, o=Ubuntu,a=noble-security, o=UbuntuESMApps,a=noble-apps-security, o=UbuntuESM,a=noble-infra-security, o=. noble,a=noble
+2026-08-24 18:48:16,097 INFO 初始黑名单：
+2026-08-24 18:48:16,097 INFO 初始白名单（not strict）：
+2026-08-24 18:48:18,134 INFO 没有找到可以无人值守升级的软件包，也没有挂起的自动删除软件包。

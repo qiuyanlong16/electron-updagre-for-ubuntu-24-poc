@@ -1,0 +1,11 @@
+{
+  "name": "nanobot",
+  "version": "1.0.0",
+  "description": "Nanobot Lenovo OEM Assistant",
+  "main": "main.js",
+  "author": "Lenovo",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^43.4.1"
+  }
+}
