@@ -26,4 +26,10 @@ describe('detectUpgradeFromLastSeen', () => {
   it('8: major bump (2.0.0 > 1.9.0) -> lastSeen', () => {
     expect(detectUpgradeFromLastSeen('2.0.0', '1.9.0')).toBe('1.9.0');
   });
+  it('9: prerelease lastSeen (1.0.0 > 1.0.0-rc1) -> returns lastSeen', () => {
+    expect(detectUpgradeFromLastSeen('1.0.0', '1.0.0-rc1')).toBe('1.0.0-rc1');
+  });
+  it('10: empty-string lastSeen -> null (invalid)', () => {
+    expect(detectUpgradeFromLastSeen('1.0.0', '')).toBeNull();
+  });
 });

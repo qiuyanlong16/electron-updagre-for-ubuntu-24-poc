@@ -16,6 +16,7 @@ declare global {
 export function useUpdateState() {
   const state = ref<UpdateState | null>(null);
   const checking = ref(false);
+  const restarting = ref(false);
   let unsub: (() => void) | null = null;
 
   onMounted(async () => {
@@ -34,8 +35,10 @@ export function useUpdateState() {
 
   async function restart() {
     if (!state.value) return;
+    if (restarting.value) return; // dedup: relaunch only once (spec §18.1 case 10)
+    restarting.value = true;
     state.value = { ...state.value, state: 'RESTARTING' };
-    await window.byclawAPI.restartApplication(); // dedup handled by UI disable (spec §18.1 case 10)
+    await window.byclawAPI.restartApplication();
   }
 
   return { state, checking, check, restart };
