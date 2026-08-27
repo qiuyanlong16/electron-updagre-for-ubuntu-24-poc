@@ -33,7 +33,8 @@ export function useUpdateState() {
   }
 
   async function restart() {
-    state.value = { ...(state.value as UpdateState), state: 'RESTARTING' } as UpdateState;
+    if (!state.value) return;
+    state.value = { ...state.value, state: 'RESTARTING' };
     await window.byclawAPI.restartApplication(); // dedup handled by UI disable (spec §18.1 case 10)
   }
 

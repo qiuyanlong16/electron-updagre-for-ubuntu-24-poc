@@ -21,5 +21,5 @@ export default defineConfig({
     renderer(),
   ],
   // Relative to root (src/renderer) -> resolves to <project>/dist/renderer.
-  build: { outDir: '../../dist/renderer' },
+  build: { outDir: '../../dist/renderer', emptyOutDir: true },
 });

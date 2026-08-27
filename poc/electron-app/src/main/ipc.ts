@@ -39,6 +39,8 @@ export function createService(runningVersion: string): UpdateService {
 
 export function registerIpc(service: UpdateService, getWindow: () => BrowserWindow | null) {
   ipcMain.handle('byclaw:get-current-version', () => app.getVersion());
+  // check-for-updates (user-initiated) and get-update-state (initial load) currently both call
+  // service.compute(); semantically distinct (may diverge) but identical today.
   ipcMain.handle('byclaw:check-for-updates', () => service.compute());
   ipcMain.handle('byclaw:get-update-state', () => service.compute());
   ipcMain.handle('byclaw:restart-application', () => {

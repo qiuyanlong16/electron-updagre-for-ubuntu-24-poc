@@ -16,7 +16,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch } from 'vue';
 import VersionButton from './components/VersionButton.vue';
 import UpdateDialog from './components/UpdateDialog.vue';
 import { useUpdateState } from './composables/useUpdateState';
@@ -28,13 +28,19 @@ const stateName = computed<UpdateStateName>(() => state.value?.state ?? 'CHECKIN
 const latestVersion = computed(() => state.value?.latestVersion ?? '');
 const installedVersion = computed(() => state.value?.installedVersion ?? '');
 const force = computed(() => stateName.value === 'READY_FORCE');
-const dialogVisible = computed(() => ['UPDATE_AVAILABLE', 'READY_OPTIONAL', 'READY_FORCE', 'RESTARTING'].includes(stateName.value));
+
+// States that show the modal dialog. READY_FORCE has no close button (force cannot be dismissed).
+const VISIBLE_STATES: UpdateStateName[] = ['UPDATE_AVAILABLE', 'READY_OPTIONAL', 'READY_FORCE', 'RESTARTING'];
+// "稍后重启"/"知道了" sets dismissed=true so the dialog hides without the 5s tick re-showing it.
+// Reset when stateName transitions to a different value (e.g. UPDATE_AVAILABLE -> READY_OPTIONAL).
+const dismissed = ref(false);
+watch(stateName, () => { dismissed.value = false; });
+const dialogVisible = computed(() => VISIBLE_STATES.includes(stateName.value) && !dismissed.value);
+
 const upgradedBanner = ref(false);
-
-function onClose() { /* only optional/UPDATE_AVAILABLE dismiss; force has no close button */ }
-
 // First-run-after-upgrade banner (spec §11) is wired in Task 3.4 via state.value?.upgradedFrom.
-onMounted(() => { upgradedBanner.value = false; });
+
+function onClose() { dismissed.value = true; }
 </script>
 <style scoped>
 .app { min-height: 100vh; background: linear-gradient(135deg, #1a1a2e, #16213e); color: #e8e8f0; }
