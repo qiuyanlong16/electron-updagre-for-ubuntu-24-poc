@@ -1,0 +1,11 @@
+[Unit]
+Description=Byclaw POC Auto-Upgrade Timer (every 2 minutes, POC)
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=2min
+AccuracySec=10s
+Unit=byclaw-poc-upgrade.service
+
+[Install]
+WantedBy=timers.target

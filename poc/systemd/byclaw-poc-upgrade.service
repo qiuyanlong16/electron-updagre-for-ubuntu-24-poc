@@ -1,0 +1,9 @@
+[Unit]
+Description=Byclaw POC Auto-Upgrade Service
+Documentation=https://github.com/qiuyanlong16/electron-updagre-for-ubuntu-24-poc
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/unattended-upgrade -v
+Nice=19
+IOSchedulingClass=idle

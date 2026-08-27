@@ -1,0 +1,5 @@
+Unattended-Upgrade::Allowed-Origins { "Lenovo:noble"; };
+Unattended-Upgrade::Package-Whitelist { "^byclaw$"; };
+Unattended-Upgrade::Package-Blacklist { "unrelated-poc"; "random-test-poc"; };
+Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+Unattended-Upgrade::MinimalSteps "true";
