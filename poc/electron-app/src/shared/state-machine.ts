@@ -1,5 +1,5 @@
 import { gt } from './semver';
-import type { UpdateState, UpdateStateName, UpdateMode } from '../renderer/types/update';
+import type { UpdateState, UpdateStateName, UpdateMode } from './types/update';
 
 export interface StateInput {
   runningVersion: string;
