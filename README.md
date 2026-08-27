@@ -1,18 +1,28 @@
 <div align="center">
 
-# Electron Auto-Update for Ubuntu 24.04 (POC)
+# Byclaw — Electron Auto-Update for Ubuntu 24.04 (POC)
 
 **A reproducible proof-of-concept for securely auto-updating a bundled
-Electron desktop app on Ubuntu 24.04 via a GPG-signed local APT repository,
-systemd timers, `unattended-upgrades`, and a dual AppArmor profile.**
+Electron (Vue 3 + TypeScript + Vite) desktop app on Ubuntu 24.04 via a
+GPG-signed local APT repository, systemd timer, `unattended-upgrades`,
+and a minimal AppArmor profile.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 ![Platform](https://img.shields.io/badge/Platform-Ubuntu%2024.04-E95420.svg)
-![Status](https://img.shields.io/badge/Status-POC-18%2F18%20PASS-brightgreen.svg)
+![Validation](https://img.shields.io/badge/validation-2%20PASS%20%C2%B7%2016%20NOT--TESTED-yellow)
 
 **English** · [中文](./README.zh-CN.md)
 
 </div>
+
+> **Honest validation status.** Of 18 acceptance cases, **2 PASS** (Case 01 —
+> two-version DEB reproducible build; Case 05 — preload/IPC isolation) and
+> **16 NOT-TESTED** (root / installed-app prerequisites not yet met). **0 FAIL,
+> 0 false PASS.** The root-dependent cases are queued in
+> [`poc/ROOT_OPS_RUNBOOK.md`](./poc/ROOT_OPS_RUNBOOK.md) (~10–15 min of `sudo`).
+> Full real-run evidence: [`poc/VALIDATION_REPORT_V2.md`](./poc/VALIDATION_REPORT_V2.md).
+> The old `poc/VALIDATION_REPORT.md` (V1) is kept unchanged but its verdicts are
+> **not credible** (报告与证据不一致，因此结果不可采信) — see V2 §结论摘要.
 
 ---
 
@@ -22,325 +32,180 @@ Updating an Electron app on Linux usually means shipping a custom in-app
 updater that downloads and replaces files at runtime. In enterprise / OEM
 contexts that approach is awkward: it typically needs **root** (or
 `pkexec`), frequently disables the Chromium **`--no-sandbox`** flag, and runs
-the updater as a privileged process — all of which are real security smells.
+the updater as a privileged process — all real security smells.
 
-This POC explores an **OS-native** alternative, modeled on a factory image:
+Byclaw explores an **OS-native** alternative, modeled on a factory image:
 
 - The app is shipped as a **`.deb`** and hosted in a **GPG-signed local APT
-  repository** (managed by `aptly`, served over HTTP).
+  repository** (managed by `aptly`, served over HTTP on `127.0.0.1:8099`).
 - Upgrades are performed by **Ubuntu's own `unattended-upgrades`**, driven by a
-  **systemd timer** — exactly the same mechanism that keeps your OS patched.
-- A normal **non-root user never types a password**; the upgrade runs as root
-  in the background, touches only package files, and never kills the running app.
-- The Electron process is **sandboxed** (`app.enableSandbox()`, no
-  `--no-sandbox`) and confined by a **dual AppArmor profile**.
-
-Everything is validated against **18 acceptance cases** — all passing on a clean
-Ubuntu 24.04.4 LTS machine. See [`poc/VALIDATION_REPORT.md`](./poc/VALIDATION_REPORT.md).
+  **systemd timer** — the same mechanism that keeps your OS patched.
+- A normal **non-root user never types a password**; the upgrade runs as root in
+  the background, touches only package files, and never kills the running app.
+- The Electron process is **sandboxed** (`app.enableSandbox()`, no `--no-sandbox`)
+  and confined by a **minimal AppArmor profile** (precise path match + `userns`,
+  no setuid `chrome-sandbox`).
 
 > ⚠️ **This is a proof-of-concept, not a production update system.** The GPG key
 > is a throwaway key with no passphrase, the repository is served over plain
-> HTTP on `localhost`, and the whole flow assumes a single trusted OEM/publisher.
-> Use it to learn and validate the *pattern*, then harden before any real use.
-
----
-
-## What it proves
-
-| Capability | Result |
-|---|---|
-| `.deb` bundles the full Electron runtime, installs to `/opt/lenovo/nanobot` (`root:root`) | ✅ |
-| App auto-upgrades `1.0.0 → 1.1.0` (and beyond) with **zero user interaction** | ✅ |
-| Only `nanobot` upgrades; unrelated repo packages are **blacklisted** | ✅ |
-| Tampered `InRelease` / `.deb` are **rejected** by GPG signature + hash checks | ✅ |
-| Running app **survives** an in-place upgrade (process is not killed) | ✅ |
-| App runs as a **non-root** user; **no `sudo`/`pkexec`/`apt`/`dpkg`** in app code | ✅ |
-| Chromium **sandbox enforced**; `--no-sandbox` is refused at runtime | ✅ |
-| **Dual AppArmor** profiles (launcher + Electron) in `enforce` mode | ✅ |
-| User config + model files unchanged across upgrade (SHA-256 matches) | ✅ |
-| App keeps running when the repository is offline | ✅ |
+> HTTP on `localhost`, and the whole flow assumes a single trusted publisher.
+> The production private-APT interface is defined as a contract only in
+> [`docs/deployment/private-apt-contract.md`](./docs/deployment/private-apt-contract.md)
+> (spec §14.10) — **not implemented** in this POC.
 
 ---
 
 ## Architecture
 
 ```
-┌──────────────────────────── OEM / publisher side ────────────────────────────┐
-│                                                                              │
-│  electron-app/      ─build-deb.sh─▶  nanobot-<ver>.deb                       │
-│  (main / preload /        (bundles full        │                              │
-│   renderer / index)       Electron runtime)    ▼                              │
-│                                       aptly repo add + publish               │
-│                                              │  (GPG-signed,                 │
-│                                              ▼   Origin=Lenovo Label=Nanobot)│
-│                                   local APT repository  (~/.aptly/public)     │
-└──────────────────────────────────────────────┬───────────────────────────────┘
-                                               │ HTTP  (nginx or python3 :8080)
-                                               ▼
-┌──────────────────────────── client / device side ────────────────────────────┐
-│                                                                              │
-│  /etc/apt/sources.list.d/nanobot-poc.sources  ──▶  apt-get update             │
-│  /usr/share/keyrings/nanobot-poc.gpg            (verifies signatures)        │
-│                                                                              │
-│  nanobot-poc-upgrade.timer  (every 2 min)                                     │
-│        │                                                                     │
-│        ▼                                                                     │
-│  nanobot-poc-upgrade.service  ──▶  unattended-upgrade  ──▶  dpkg install      │
-│   (oneshot, Nice=19,            (whitelist ^nanobot$,         (1.0.0 → 1.1.0)  │
-│    idle I/O)                    blacklist unrelated-…)                        │
-│                                                                              │
-│  /opt/lenovo/nanobot/nanobot         (launcher, root:root, 0755)              │
-│      └── Px ──▶ /opt/lenovo/nanobot/electron/electron                        │
-│                  (AppArmor enforce · Chromium sandbox · non-root user)        │
-└──────────────────────────────────────────────────────────────────────────────┘
+┌── renderer (Vue 3 + TS + Vite) ───────────────────────────────────────┐
+│  App.vue · VersionButton.vue · UpdateDialog.vue · useUpdateState()     │
+│  (never reads system files, never calls apt/dpkg — no hardcoded version)│
+└───────────────▲───────────────────────────────────contextBridge────────┘
+                │ 5 safe IPC methods only
+┌───────────────┴── preload (sandboxed) ─────────────────────────────────┐
+│ getCurrentVersion · checkForUpdates · getUpdateState ·                  │
+│ restartApplication · onUpdateStateChanged                               │
+│ (no raw ipcRenderer, no child_process/fs/shell exposed)                 │
+└───────────────▲─────────────────────────────────────────────────────────┘
+                │ ipcMain.handle
+┌───────────────┴── main process ───────────────────────────────────────┐
+│ update-service: fetches update-policy.json (HTTP, 127.0.0.1:8099),      │
+│ reads /var/lib/lenovo/byclaw/update-state.json, computes state via a     │
+│ PURE state-machine (src/shared/state-machine.ts + semver.ts).            │
+│ restart = app.relaunch(); app.exit(0) — no apt/dpkg/sudo/pkexec.         │
+└───────────────▲─────────────────────────────────────────────────────────┘
+                │ built + packaged (normal user, no root)
+┌───────────────┴── delivery ────────────────────────────────────────────┐
+│ vite build → electron-builder --dir (extraMetadata.version) →           │
+│ dpkg-deb --build → byclaw_X.Y.Z_amd64.deb → installs to /opt/lenovo/byclaw│
+│ aptly signed repo (Origin=Lenovo, Label=Byclaw, Suite=noble) →          │
+│ unattended-upgrades (root, passwordless, no NOPASSWD) + systemd timer + │
+│ minimal AppArmor profile (/etc/apparmor.d/com.lenovo.byclaw)            │
+└──────────────────────────────────────────────────────────────────────────┘
 ```
+
+**Update state machine** — the main process computes one of seven states using
+semver comparison (never string comparison):
+
+`CHECKING` · `LATEST` · `UPDATE_AVAILABLE` · `READY_OPTIONAL` ·
+`READY_FORCE` · `RESTARTING` · `ERROR`
+
+Only `READY_FORCE` (an installed version newer than the running one **and**
+`mode=force`) freezes the UI; a server-only "new version available but not yet
+installed" never freezes. Only `installedVersion > runningVersion` may enter
+`READY_OPTIONAL`/`READY_FORCE`. `ERROR` never freezes and never blocks normal
+use.
+
+**Version source.** The displayed version is never hardcoded in any Vue page.
+It comes from Electron's `app.getVersion()` (delivered to the renderer through
+`getCurrentVersion()`). At build time `electron-builder` injects the version via
+`extraMetadata.version` (the source `package.json` stays at the `0.0.0-dev`
+baseline and is never rewritten). One build injects the version consistently
+into **six** places, verified by `verify-versions.sh`:
+
+1. `app.getVersion()` (product package.json via extraMetadata)
+2. `DEBIAN/control` `Version`
+3. `postinst` `installedVersion` written to `update-state.json`
+4. DEB filename `byclaw_<VERSION>_amd64.deb`
+5. `update-policy.json` `latestVersion` (a build artifact, not hand-maintained)
+6. APT `Packages` index `Version` (from the deb control via aptly)
 
 ---
 
-## Project structure
+## Reproduce it (normal user, no sudo)
 
-```
-.
-├── LICENSE                         # MIT (for this POC's own source)
-├── README.md                       # you are here (English)
-├── README.zh-CN.md                 # 中文概览
-└── poc/
-    ├── README.md                   # 完整中文分步教程 (deep-dive tutorial, kept as-is)
-    ├── VALIDATION_REPORT.md        # 18-case validation report (100% PASS)
-    ├── electron-app/               # the Electron app source (main/preload/renderer/index)
-    ├── packaging/                  # nanobot.desktop entry
-    ├── apparmor/                   # dual AppArmor profiles (launcher + electron)
-    ├── systemd/                    # upgrade timer + oneshot service
-    ├── client-config/              # APT source + unattended-upgrades config package
-    ├── apt-repository/             # generated repo state (GPG key, aptly) — gitignored
-    ├── scripts/                    # build / setup / publish / serve / cleanup / acceptance
-    ├── tests/                      # scenario scripts A–I + master runner
-    └── evidence/                   # screenshots + command output from the validation run
-```
-
-> Build artifacts are intentionally **not** committed (see
-> [What is NOT in this repo](#what-is-not-in-this-repo)). Clone, run the
-> scripts, and they are regenerated locally.
-
----
-
-## Requirements
-
-- **Ubuntu 24.04 LTS** (Noble Numbat), `amd64`. Validated on **24.04.4**,
-  kernel `7.0.0-28-generic`.
-- **root** (`sudo`) for the system-level setup scripts.
-- System packages: `aptly`, `gnupg2`, `nginx` (or `python3` as a fallback
-  HTTP server), `apparmor`, `unattended-upgrades`, `dpkg-deb`, `systemd`.
-- **Node.js 22 + npm** — only to fetch the Electron runtime that gets bundled
-  into the `.deb`.
-- For GUI/headless testing (optional): `xvfb`, `scrot`, `xdotool`,
-  `imagemagick`.
-
----
-
-## Quick start
-
-The whole thing is driven by shell scripts. The canonical reproduction is:
+Everything below runs as a normal user. Root steps are optional and clearly
+marked; they are queued in
+[`poc/ROOT_OPS_RUNBOOK.md`](./poc/ROOT_OPS_RUNBOOK.md).
 
 ```bash
-# 1. Clone and enter the POC directory
+# 0. Clone and install build deps once (Node.js 22 + npm; system tools already
+#    present on the validation host: aptly, gnupg2, apparmor, dpkg-deb).
 git clone git@github.com:qiuyanlong16/electron-updagre-for-ubuntu-24-poc.git
-cd electron-updagre-for-ubuntu-24-poc/poc
+cd electron-updagre-for-ubuntu-24-poc
 
-# 2. Install system dependencies
-sudo apt-get update
-sudo apt-get install -y aptly gnupg2 nginx python3 \
-                        unattended-upgrades apparmor-utils dpkg-dev
+# 1. Build both versioned DEBs (reproducible). build-version.sh runs the unit
+#    suite, then vite build, then electron-builder --dir, then dpkg-deb --build.
+bash poc/scripts/build-version.sh 1.0.0    # → poc/packages/byclaw_1.0.0_amd64.deb
+bash poc/scripts/build-version.sh 1.1.0    # → poc/packages/byclaw_1.1.0_amd64.deb
 
-# 3. Install Node.js 22 (needed to fetch the Electron runtime)
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt-get install -y nodejs
-cd electron-app && npm install && cd ..        # pulls electron into node_modules/
+# 2. Run the unit suite alone (pure state-machine + update-service + semver +
+#    upgrade-detect + restart-dedup, 5 test files).
+cd poc/electron-app && npm ci && npx vitest run && cd ../..
 
-# 4. One-shot OEM-stage setup:
-#      builds + installs nanobot 1.0.0
-#      creates a throwaway GPG key + signed local APT repo
-#      installs client APT source + unattended-upgrades config
-#      installs the desktop entry + dual AppArmor profiles
-#      installs + enables the 2-minute upgrade timer
-#      starts the HTTP repository server on :8080
-sudo ./scripts/init-oem.sh
+# 3. Run the 18-case validation. Normal-user cases execute for real; root /
+#    installed-app cases self-report NOT-TESTED (they never claim PASS without
+#    real evidence — per spec §17.3).
+bash poc/tests-v2/run-all-cases.sh
 
-# 5. Create a non-root user that the app will run as
-sudo useradd -m -s /bin/bash nanobot-testuser
-sudo passwd nanobot-testuser          # only needed to log in / launch the GUI
-
-# 6. Simulate the OEM publishing a new version (builds + publishes 1.1.0)
-./scripts/publish-1.1.sh
-
-# 7. Trigger the upgrade immediately (or just wait ≤ 2 min for the timer)
-sudo systemctl start nanobot-poc-upgrade.service
-
-# 8. Verify the auto-upgrade happened
-dpkg-query -W nanobot                  # → nanobot  1.1.0
+# 4. Serve the aptly repo on 127.0.0.1:8099 (start | status | stop).
+bash poc/scripts/serve-repo.sh start
 ```
 
-### Verify the security posture
+> Build artifacts are gitignored and regenerated locally — `poc/packages/`
+> (DEBs + extracted Electron runtime), `poc/electron-app/node_modules/`, and the
+> GPG material under `poc/apt-repository/gpg-home/` (never committed).
 
-```bash
-sudo aa-status | grep nanobot          # both profiles in (enforce)
-ps -eo user,args | grep '[e]lectron'  # runs as nanobot-testuser, not root
-                                       # no --no-sandbox; renderer has --enable-sandbox
-```
+### Optional: complete the root-dependent validation
 
-### Run the automated tests
-
-```bash
-sudo ./scripts/acceptance.sh           # fast smoke test (~20 checks)
-sudo ./tests/run-all-tests.sh          # full scenario suite A–I (needs the test user + a display)
-```
-
-### Clean up
-
-```bash
-sudo ./scripts/cleanup-poc.sh          # removes packages, timer, profiles, repo config, test user
-```
-
-> The detailed, heavily-commented walkthrough of **every** command and concept
-> (in Chinese, aimed at Linux newcomers) lives in
-> [`poc/README.md`](./poc/README.md). Sections 5–7 there cover AppArmor,
-> systemd/unattended-upgrades, and the 18 validation cases in depth.
+The 16 NOT-TESTED cases need the root install chain (install keyring + APT
+source + unattended config + systemd timer, `dpkg -i`, AppArmor enforce,
+tamper tests). Each step explains which system files it touches and pauses for
+you to run `sudo` manually — **no NOPASSWD, no password handling**. Start in
+[`poc/ROOT_OPS_RUNBOOK.md`](./poc/ROOT_OPS_RUNBOOK.md), then re-run the matching
+`case-XX.sh` and capture the four required GUI screenshots via
+`poc/tests-v2/screenshot.sh`.
 
 ---
 
-## How the auto-upgrade works
+## Security posture
 
-1. **`init-oem.sh`** builds `nanobot-1.0.0.deb` (bundling the Electron runtime
-   into `/opt/lenovo/nanobot/`), installs it, and stands up a signed APT repo.
-2. **`setup-repo.sh`** generates a fresh GPG key, creates the `aptly` repo with
-   `Origin=Lenovo` / `Label=Nanobot`, publishes it, and serves `~/.aptly/public`
-   over HTTP.
-3. **`setup-client-config.sh`** installs the APT source
-   (`nanobot-poc.sources`, `Signed-By` the repo public key) and the
-   `unattended-upgrades` policy that allows only `Lenovo:noble` and only
-   `^nanobot$` / `^nanobot-.*` packages.
-4. **`publish-1.1.sh`** builds `1.1.0`, adds it to the repo, and re-publishes.
-5. The **`nanobot-poc-upgrade.timer`** fires `nanobot-poc-upgrade.service`
-   every 2 minutes; the service runs `unattended-upgrade -v` as root at the
-   lowest CPU/IO priority. `dpkg` swaps the files on disk; the already-running
-   process keeps its in-memory image, so the app is **not** killed mid-flight.
-6. Because updates come through the signed APT channel, **tampering with
-   `InRelease` or the `.deb` is detected** (signature / hash mismatch) and the
-   upgrade is refused.
+| Invariant | How it is upheld |
+|---|---|
+| GPG-signed APT repo, pinned by keyring | `Signed-By: /usr/share/keyrings/byclaw-poc.gpg`; **not** `Trusted: yes` |
+| Electron sandbox on, `--no-sandbox` refused | `app.enableSandbox()` before `whenReady()`; `--no-sandbox` → `app.exit(1)` |
+| `/opt/lenovo/byclaw` not writable by normal user | `root:root`, installed by `dpkg`; Case 02 |
+| App never runs as root | launched as the consumer user; Case 04 |
+| Minimal AppArmor profile | precise path match + `userns`; no `sys_admin`/`setuid`/`dac_read_search`; `chrome-sandbox` kept `0755` (not `4755`) |
+| Unattended-upgrades passwordless | root background service; no `NOPASSWD`, no password handling |
+| No `chmod 777` | never used anywhere |
+| App runtime never invokes privileged tools | `sudo`/`pkexec`/`apt`/`apt-get`/`dpkg`/`dpkg-query`/`unattended-upgrade`/`systemctl` appear **only** in build scripts, the root install chain, and test scripts — never in the Electron app code (spec §6.4) |
 
----
-
-## Security model
-
-- **Non-root execution** — the Electron process runs as the launching user
-  (e.g. `nanobot-testuser`), never as root. No `sudo`/`pkexec`/`apt`/`dpkg`
-  appears anywhere in the app code (`main.js`, `preload.js`, `renderer.js`).
-- **Chromium sandbox enforced** — `app.enableSandbox()` is called before
-  `app.whenReady()`; `BrowserWindow` uses `sandbox: true`,
-  `contextIsolation: true`, `nodeIntegration: false`; and `main.js`
-  **refuses to start** if `--no-sandbox` is passed on the command line.
-- **Dual AppArmor profile** —
-  `com.lenovo.nanobot` confines the launcher and uses a `Px` transition into
-  `com.lenovo.nanobot.electron`, which confines the Electron binary
-  (`userns`, `capability sys_chroot`, `/dev/shm`, etc.). Both are in `enforce`.
-  `chrome-sandbox` is `setuid root` (`4755`) for sandbox setup.
-- **Signed, tamper-evident delivery** — the APT repo is GPG-signed; the client
-  pins it with `Signed-By`, so a forged `InRelease` or modified `.deb` is
-  rejected. Files under `/opt` are `root:root` and not writable by users.
-- **No dangerous config** — no `chmod 777`, no `NOPASSWD: ALL`, no
-  `Trusted: yes` (validation Case 16).
-- **User data integrity** — upgrades touch only package files; user config and
-  model files are byte-for-byte identical before/after (validation Case 13).
+All root work lives in the systemd unit / `postinst` /
+`install-client-config.sh`, run by the admin — never by the app. The app only
+queries versions, displays state, and relaunches itself.
 
 ---
 
 ## Validation (18 cases)
 
-All 18 cases pass. Summary:
+Real-run verdicts from [`poc/VALIDATION_REPORT_V2.md`](./poc/VALIDATION_REPORT_V2.md):
 
-| # | Case | # | Case |
-|---|---|---|---|
-| 1 | Installed under `/opt/lenovo/nanobot` | 10 | User never types a password |
-| 2 | Files `root:root`, users can't modify | 11 | Running app survives upgrade |
-| 3 | Desktop entry in `/usr/share/applications` | 12 | Restart shows new version |
-| 4 | Non-root user can launch it | 13 | User config + model hash unchanged |
-| 5 | Electron does not run as root | 14 | Tampered packages rejected by APT |
-| 6 | No `sudo`/`pkexec`/`apt`/`dpkg` in app | 15 | App runs when repo is offline |
-| 7 | No `--no-sandbox` | 16 | No `chmod 777` / `NOPASSWD` / `Trusted: yes` |
-| 8 | Dual AppArmor profile loaded (`enforce`) | 17 | Only `nanobot` upgrades (whitelist+blacklist) |
-| 9 | systemd auto-upgrades 1.0 → 1.1 | 18 | Process user + launch params correct |
+| Case | Verifies | Verdict |
+|---:|---|---|
+| 01 | Two versioned DEBs build reproducibly | **PASS** |
+| 05 | preload/IPC isolation (5 methods, no forbidden requires, no raw ipcRenderer) | **PASS** |
+| 02, 03, 04, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16, 17, 18 | root / installed-app / GUI cases | **NOT-TESTED** |
 
-Full evidence (command output, screenshots) is in
-[`poc/VALIDATION_REPORT.md`](./poc/VALIDATION_REPORT.md), and screenshots live
-in [`poc/evidence/`](./poc/evidence/).
+**Summary: 2 PASS · 16 NOT-TESTED · 0 FAIL · 0 false PASS.** During the real run
+two bugs that would have produced false verdicts were caught and fixed before
+any verdict was recorded (V2 §4) — exactly the discipline spec §17.3 demands
+("禁止用代码审查结论代替运行证据").
 
 ---
 
-## Scripts reference
+## Pointers
 
-| Script | Purpose |
+| Document | What it is |
 |---|---|
-| `scripts/init-oem.sh` | One-shot OEM-stage setup (build → install → repo → client config → timer) |
-| `scripts/build-deb.sh <ver>` | Build `nanobot-<ver>.deb` (bundles Electron runtime) |
-| `scripts/setup-repo.sh` | Generate GPG key, create + publish the signed aptly repo |
-| `scripts/setup-client-config.sh` | Install APT source + `unattended-upgrades` policy + public key |
-| `scripts/publish-1.1.sh` | Build + publish a new version (simulates an OEM update push) |
-| `scripts/serve-repo.sh [start\|stop\|status]` | Serve the repo over HTTP (nginx, or python3 fallback) |
-| `scripts/acceptance.sh` | Fast automated smoke test |
-| `tests/run-all-tests.sh` | Full scenario suite (A–I) with report |
-| `scripts/cleanup-poc.sh` | Remove everything the POC installed |
-
----
-
-## What is NOT in this repo
-
-These are **regenerated locally** — they are gitignored so the clone stays
-small and no secrets leak:
-
-| Path | Why excluded | How to regenerate |
-|---|---|---|
-| `poc/packages/` (~3 GB) | Build output: 8 `.deb`s + extracted Electron runtimes | `./scripts/build-deb.sh <ver>` |
-| `poc/electron-app/node_modules/` (~327 MB) | npm dependency tree | `npm install` in `poc/electron-app/` |
-| `poc/apt-repository/gpg-home/` | **GPG private key + keyring** — never commit | `sudo ./scripts/setup-repo.sh` |
-| `poc/apt-repository/aptly.conf`, `nanobot-poc-public.gpg` | Generated by `setup-repo.sh` | same |
-| `poc/logs/`, `poc/tests/results/` | Runtime logs / test output | run the scripts/tests |
-
-> 🔑 The GPG key under `gpg-home/` is a **throwaway** key generated fresh on
-> every `setup-repo.sh` run. It is never committed. If you ever find key
-> material checked in, treat it as compromised and regenerate.
-
----
-
-## Troubleshooting (highlights)
-
-- **Timer never upgrades anything** → check `systemctl status
-  nanobot-poc-upgrade.timer` is `active (waiting)`, then
-  `journalctl -u nanobot-poc-upgrade.service -e`. Confirm the repo
-  `Origin`/`Label` matches `Allowed-Origins`:
-  `curl -s http://localhost:8080/dists/noble/Release | grep -E '^(Origin|Label):'`
-  (must be `Lenovo` / `Nanobot`).
-- **AppArmor denies** → `sudo dmesg | grep -i apparmor | grep -i denied`
-  and add the missing path to the profile, then
-  `sudo apparmor_parser -r /etc/apparmor.d/com.lenovo.nanobot*`.
-- **No GUI / headless** → `export DISPLAY=:99` and run `Xvfb :99 &` first.
-- **`apt` doesn't see the new version** → `sudo rm -rf /var/lib/apt/lists/* && sudo apt-get update`, then `apt-cache policy nanobot`.
-
-The full troubleshooting guide (AppArmor syntax, timer, unattended-upgrades,
-GUI, APT cache) is §8 of [`poc/README.md`](./poc/README.md).
-
----
-
-## Limitations & production notes
-
-- Throwaway, passphrase-less GPG key; plain-HTTP `localhost` repo.
-- Single trusted publisher; no key rotation / revocation flow.
-- The 2-minute timer cadence is for fast POC iteration — use a sane policy
-  (e.g. daily) in real life.
-- `unattended-upgrades`' `Package-Whitelist` is **"not strict"**: it must be
-  paired with a `Package-Blacklist` to actually exclude non-matching packages
-  (this is why both are configured — see validation Case 17).
-- Bundling the full Electron runtime makes each `.deb` ~92 MB; consider
-  delta/downstream packaging for real distribution.
+| [`poc/README.md`](./poc/README.md) | Deep-dive tutorial (kept from the prior POC; still references the old "nanobot" name and needs a Byclaw update — tracked in the changelog) |
+| [`poc/VALIDATION_REPORT_V2.md`](./poc/VALIDATION_REPORT_V2.md) | Real-evidence validation report (source of truth for the badge above) |
+| [`poc/ROOT_OPS_RUNBOOK.md`](./poc/ROOT_OPS_RUNBOOK.md) | How to complete the 16 root-dependent cases |
+| [`docs/deployment/private-apt-contract.md`](./docs/deployment/private-apt-contract.md) | Production private-APT service interface contract (spec §14.10, not implemented in POC) |
+| [`docs/byclaw-file-changelog.md`](./docs/byclaw-file-changelog.md) | File-level modification list for this branch |
+| [`docs/superpowers/specs/2026-08-27-byclaw-vue3-redesign-design.md`](./docs/superpowers/specs/2026-08-27-byclaw-vue3-redesign-design.md) | Full design spec |
+| [`docs/superpowers/plans/2026-08-27-byclaw-vue3-redesign.md`](./docs/superpowers/plans/2026-08-27-byclaw-vue3-redesign.md) | Implementation plan |
 
 ---
 
@@ -350,15 +215,7 @@ The source code in this repository is licensed under the **MIT License** — see
 [`LICENSE`](./LICENSE).
 
 The built `.deb` packages **bundle the Electron framework** (which embeds
-Chromium and Node.js). Electron, Chromium and Node.js are distributed under
+Chromium and Node.js). Electron, Chromium, and Node.js are distributed under
 their own open-source licenses; see `LICENSES.chromium.html` inside any built
-package and <https://www.electronjs.org/docs/latest/tutorial/licenses>. This
-MIT notice covers only the original code written for this proof-of-concept.
-
----
-
-## Acknowledgements
-
-Built as a research POC to validate an OS-native, APT-based auto-update pattern
-for Electron apps on Ubuntu 24.04. Thanks to the maintainers of `aptly`,
-`unattended-upgrades`, AppArmor, and Electron — the heavy lifting is all theirs.
+package and <https://www.electronjs.org/docs/latest/tutorial/licenses>. This MIT
+notice covers only the original code written for this proof-of-concept.
