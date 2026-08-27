@@ -15,8 +15,17 @@ export class UpdateService {
   private inFlight: Promise<UpdateState> | null = null;
   constructor(private deps: UpdateServiceDeps) {}
 
-  /** Compute the current UpdateState. Concurrent calls are deduped (spec §18.1 case 9). */
+  /**
+   * Compute the current UpdateState. Concurrent calls are deduped (spec §18.1 case 9).
+   *
+   * `runningVersion` is trusted (from app.getVersion()) and is NOT re-validated here;
+   * untrusted disk/network versions are validated with isValid before reaching the
+   * throwing computeState (gt).
+   */
   async compute(): Promise<UpdateState> {
+    // Followers adopt the in-flight promise; only the leader (below) resets inFlight in finally.
+    // Because compute() is async, a follower's `return this.inFlight` resolves to the leader's
+    // value — behavioral dedup (same resolved value), not promise identity.
     if (this.inFlight) return this.inFlight;
     this.inFlight = (async () => {
       const { runningVersion, readStateFile, fetchPolicy, policyTimeoutMs = 3000 } = this.deps;
@@ -46,7 +55,7 @@ export class UpdateService {
       let policyError: string | null = null;
       try {
         const p = await withTimeout(fetchPolicy(), policyTimeoutMs);
-        if (!isValid(p.latestVersion)) {
+        if (typeof p.latestVersion !== 'string' || !isValid(p.latestVersion)) {
           policyError = 'invalid-latest-version';
         } else {
           latestVersion = p.latestVersion;

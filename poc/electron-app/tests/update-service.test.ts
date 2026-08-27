@@ -55,4 +55,25 @@ describe('UpdateService', () => {
     expect(a).toEqual(b);
     expect(b).toEqual(c);
   });
+  it('after a deduped batch, a later compute() runs a fresh fetch (inFlight reset)', async () => {
+    let calls = 0;
+    const svc = new UpdateService({
+      readStateFile: async () => okState('1.0.0'),
+      runningVersion: '1.0.0',
+      fetchPolicy: async () => { calls++; return policy('1.0.0'); },
+    });
+    await Promise.all([svc.compute(), svc.compute(), svc.compute()]);
+    expect(calls).toBe(1);
+    await svc.compute();
+    expect(calls).toBe(2); // proves finally cleared inFlight, not stuck
+  });
+  it('threads policy releaseNotes into the computed state', async () => {
+    const svc = new UpdateService({
+      readStateFile: async () => okState('1.0.0'),
+      runningVersion: '1.0.0',
+      fetchPolicy: async () => ({ latestVersion: '1.0.0', mode: 'optional', releaseNotes: ['fix x'] } as any),
+    });
+    const s = await svc.compute();
+    expect(s.releaseNotes).toEqual(['fix x']);
+  });
 });
