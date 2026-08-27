@@ -8,6 +8,8 @@ PRE="$ROOT/electron-app/src/preload"
 # -F fixed-string for the literal 'byclawAPI' exposure (portable, no regex paren ambiguity)
 grep -RF "exposeInMainWorld('byclawAPI'" "$PRE" | tee "$EV/case-05-preload.txt"
 # count method keys inside the exposeInMainWorld(...) block (expect exactly 5)
+# ASSUMPTION: preload methods are flat — no one-line callback ending in '});' inside a method body,
+# else awk exits early at the first '});' and undercounts (false FAIL). Current preload satisfies this.
 MCOUNT="$(awk '/exposeInMainWorld/{f=1} f{print} /});/{if(f)exit}' "$PRE"/*.ts 2>/dev/null | grep -cE '^[[:space:]]+[a-zA-Z]+[[:space:]]*:' )"
 echo "method count: ${MCOUNT:-0} (expect 5)" | tee -a "$EV/case-05-preload.txt"
 # FAIL if forbidden: require child_process/fs, or RAW ipcRenderer exposure to the renderer
