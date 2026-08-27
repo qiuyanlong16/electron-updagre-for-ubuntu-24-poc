@@ -37,12 +37,17 @@ export function createService(runningVersion: string): UpdateService {
   });
 }
 
-export function registerIpc(service: UpdateService, getWindow: () => BrowserWindow | null) {
+export function registerIpc(
+  service: UpdateService,
+  getWindow: () => BrowserWindow | null,
+  decorate: (s: UpdateState) => UpdateState,
+) {
   ipcMain.handle('byclaw:get-current-version', () => app.getVersion());
-  // check-for-updates (user-initiated) and get-update-state (initial load) currently both call
-  // service.compute(); semantically distinct (may diverge) but identical today.
-  ipcMain.handle('byclaw:check-for-updates', () => service.compute());
-  ipcMain.handle('byclaw:get-update-state', () => service.compute());
+  // check-for-updates (user-initiated) and get-update-state (initial load) both call the same
+  // decorated compute() (main attaches the upgradedFrom banner field); semantically distinct, may diverge.
+  const compute = async () => decorate(await service.compute());
+  ipcMain.handle('byclaw:check-for-updates', compute);
+  ipcMain.handle('byclaw:get-update-state', compute);
   ipcMain.handle('byclaw:restart-application', () => {
     app.relaunch();
     app.exit(0);

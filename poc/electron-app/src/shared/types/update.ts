@@ -22,4 +22,5 @@ export interface UpdateState {
   releaseNotes: string[];
   stateSource: 'update-state.json' | 'fallback';
   error?: string;
+  upgradedFrom?: string; // spec §11: set by main when getVersion() > lastSeenVersion (first run after upgrade)
 }

@@ -37,8 +37,9 @@ const dismissed = ref(false);
 watch(stateName, () => { dismissed.value = false; });
 const dialogVisible = computed(() => VISIBLE_STATES.includes(stateName.value) && !dismissed.value);
 
-const upgradedBanner = ref(false);
-// First-run-after-upgrade banner (spec §11) is wired in Task 3.4 via state.value?.upgradedFrom.
+// First-run-after-upgrade banner (spec §11): main attaches upgradedFrom (the prior version) to
+// every pushed state when getVersion() > lastSeenVersion; banner shows "已更新到 <runningVersion>".
+const upgradedBanner = computed(() => !!state.value?.upgradedFrom);
 
 function onClose() { dismissed.value = true; }
 </script>
