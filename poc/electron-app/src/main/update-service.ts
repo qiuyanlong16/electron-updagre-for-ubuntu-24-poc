@@ -59,8 +59,12 @@ export class UpdateService {
           policyError = 'invalid-latest-version';
         } else {
           latestVersion = p.latestVersion;
-          mode = p.mode;
-          releaseNotes = p.releaseNotes ?? [];
+          const m = p.mode;
+          // Untrusted network mode: only accept the two known values; anything else degrades
+          // to null (→ optional path in computeState), matching the validation discipline applied
+          // to installedVersion/latestVersion. Behavior-preserving for valid policies.
+          mode = (m === 'optional' || m === 'force') ? m : null;
+          releaseNotes = Array.isArray(p.releaseNotes) ? p.releaseNotes : [];
         }
       } catch (e) {
         const msg = e instanceof Error ? e.message : 'policy-fetch-failed';

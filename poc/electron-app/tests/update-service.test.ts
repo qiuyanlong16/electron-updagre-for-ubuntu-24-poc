@@ -76,4 +76,23 @@ describe('UpdateService', () => {
     const s = await svc.compute();
     expect(s.releaseNotes).toEqual(['fix x']);
   });
+  it('non-array releaseNotes from policy -> [] (boundary honesty)', async () => {
+    const svc = new UpdateService({
+      readStateFile: async () => okState('1.0.0'),
+      runningVersion: '1.0.0',
+      fetchPolicy: async () => ({ latestVersion: '1.0.0', mode: 'optional', releaseNotes: 'oops' } as any),
+    });
+    const s = await svc.compute();
+    expect(s.releaseNotes).toEqual([]);
+  });
+  it('unknown policy mode -> null (degrades to optional path, never force-freeze)', async () => {
+    const svc = new UpdateService({
+      readStateFile: async () => okState('1.0.0'),
+      runningVersion: '1.0.0',
+      fetchPolicy: async () => ({ latestVersion: '1.0.0', mode: 'banana', releaseNotes: [] } as any),
+    });
+    const s = await svc.compute();
+    expect(s.mode).toBe(null);
+    expect(s.state).toBe('LATEST'); // installed not ahead, latest == running -> LATEST, not a freeze
+  });
 });

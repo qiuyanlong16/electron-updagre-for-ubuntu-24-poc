@@ -11,11 +11,14 @@ function readStateFile(): Promise<string> {
 }
 
 function readPolicyUrl(): string {
+  const DEFAULT = 'http://127.0.0.1:8099/update-policy.json';
   try {
     const cfg = JSON.parse(readFileSync(CONFIG_PATH, 'utf8'));
-    return cfg.updatePolicyUrl as string;
+    const url = cfg.updatePolicyUrl;
+    if (typeof url === 'string' && url.length > 0) return url;
+    return DEFAULT;
   } catch {
-    return 'http://127.0.0.1:8099/update-policy.json';
+    return DEFAULT;
   }
 }
 
@@ -25,6 +28,8 @@ export function createService(runningVersion: string): UpdateService {
     readStateFile,
     fetchPolicy: async (): Promise<UpdatePolicy> => {
       const url = readPolicyUrl();
+      // AbortSignal cancels the HTTP socket; UpdateService.withTimeout (same 3s) caps the
+      // whole fetchPolicy incl. res.json() parsing. Intentional belt-and-suspenders.
       const res = await fetch(url, { signal: AbortSignal.timeout(3000) });
       if (!res.ok) throw new Error(`policy http ${res.status}`);
       return (await res.json()) as UpdatePolicy;
