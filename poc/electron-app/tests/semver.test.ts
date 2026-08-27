@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { compareSemver, gt, lte } from '../src/shared/semver';
+import { compareSemver, gt, lte, isValid } from '../src/shared/semver';
 
 describe('semver', () => {
   it('1.10.0 > 1.9.0 (not string compare)', () => {
@@ -18,5 +18,11 @@ describe('semver', () => {
   });
   it('throws on invalid', () => {
     expect(() => compareSemver('x', '1.0.0')).toThrow();
+  });
+  it('isValid recognizes valid/invalid', () => {
+    expect(isValid('1.0.0')).toBe(true);
+    expect(isValid('1.10.0')).toBe(true);
+    expect(isValid('abc')).toBe(false);
+    expect(isValid('')).toBe(false);
   });
 });
