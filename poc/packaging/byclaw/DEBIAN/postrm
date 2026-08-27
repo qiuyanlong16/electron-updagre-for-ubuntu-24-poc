@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+if [ "$1" = "purge" ]; then
+  rm -rf /var/lib/lenovo/byclaw /etc/lenovo/byclaw
+  logger -t byclaw "Byclaw purged (system-side data removed; user data preserved)"
+fi
+exit 0

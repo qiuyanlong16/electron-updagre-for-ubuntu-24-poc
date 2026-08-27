@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Byclaw
+GenericName=Lenovo OEM Assistant
+Exec=/opt/lenovo/byclaw/byclaw %U
+Icon=/opt/lenovo/byclaw/resources/icon.png
+Terminal=false
+Categories=Utility;
+Keywords=lenovo;oem;byclaw;
+StartupWMClass=byclaw

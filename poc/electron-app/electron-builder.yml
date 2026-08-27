@@ -1,0 +1,15 @@
+appId: com.lenovo.byclaw
+productName: byclaw
+directories:
+  output: ../dist-electron
+files:
+  - dist/main.js
+  - dist/preload.js
+  - dist/renderer/**
+asar: true
+linux:
+  target:
+    - dir
+  category: Utility
+  executableName: byclaw
+  maintainer: Lenovo OEM <oem@lenovo.com>

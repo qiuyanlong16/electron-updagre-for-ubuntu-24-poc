@@ -1,0 +1,35 @@
+#!/bin/bash
+set -e
+VERSION="__VERSION__"
+STATE_DIR="/var/lib/lenovo/byclaw"
+STATE_FILE="${STATE_DIR}/update-state.json"
+MODELS_DIR="${STATE_DIR}/models"
+
+mkdir -p "${STATE_DIR}" "${MODELS_DIR}"
+chmod 0755 "${STATE_DIR}" "${MODELS_DIR}"
+chown root:root "${STATE_DIR}" "${MODELS_DIR}"
+
+# Atomic write of update-state.json (temp + mv), idempotent (spec §9.1)
+TMP="$(mktemp "${STATE_FILE}.XXXXXX")"
+NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+cat > "${TMP}" <<EOF
+{
+  "status": "installed",
+  "installedVersion": "${VERSION}",
+  "installedAt": "${NOW}"
+}
+EOF
+chown root:root "${TMP}"
+chmod 0644 "${TMP}"
+mv -f "${TMP}" "${STATE_FILE}"
+
+# Refresh desktop database
+update-desktop-database /usr/share/applications 2>/dev/null || logger -t byclaw "postinst: desktop-db refresh soft-failed"
+
+# Load AppArmor profile (do not fail install; Case 7 records real enforce) (spec §13.8)
+if command -v apparmor_parser >/dev/null 2>&1 && [ -f /etc/apparmor.d/com.lenovo.byclaw ]; then
+  apparmor_parser -r /etc/apparmor.d/com.lenovo.byclaw 2>/dev/null || logger -t byclaw "postinst: apparmor reload soft-failed"
+fi
+
+logger -t byclaw "Byclaw ${VERSION} installed successfully"
+exit 0
