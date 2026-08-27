@@ -11,6 +11,7 @@
       :force="force"
       :latest-version="latestVersion"
       :installed-version="installedVersion"
+      :release-notes="releaseNotes"
       @close="onClose"
       @restart="restart" />
   </div>
@@ -27,6 +28,7 @@ const runningVersion = computed(() => state.value?.runningVersion ?? '');
 const stateName = computed<UpdateStateName>(() => state.value?.state ?? 'CHECKING');
 const latestVersion = computed(() => state.value?.latestVersion ?? '');
 const installedVersion = computed(() => state.value?.installedVersion ?? '');
+const releaseNotes = computed<string[]>(() => state.value?.releaseNotes ?? []);
 const force = computed(() => stateName.value === 'READY_FORCE');
 
 // States that show the modal dialog. READY_FORCE has no close button (force cannot be dismissed).

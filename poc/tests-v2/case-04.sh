@@ -13,5 +13,7 @@ echo "  sudo su - byclaw-testuser -c 'DISPLAY=:0 XDG_RUNTIME_DIR=/run/user/\$(id
 echo "This case verifies the app runs as the non-root test user; user switch needs root."
 if ! id byclaw-testuser >/dev/null 2>&1; then echo NOT-TESTED > "$EV/case-04.verdict"; exit 0; fi
 sleep 3
-ps -eo user,pid,args | grep -F '/opt/lenovo/byclaw' | grep -v grep | tee "$EV/case-04-ps.txt"
+# user:32 widens the column (procps-ng truncates to 8 chars + '+' suffix by default, so the
+# 15-char name "byclaw-testuser" would print as "byclaw-+" and the anchored grep below misses).
+ps -eo user:32,pid,args | grep -F '/opt/lenovo/byclaw' | grep -v grep | tee "$EV/case-04-ps.txt"
 if grep -q "^byclaw-testuser" "$EV/case-04-ps.txt"; then echo PASS > "$EV/case-04.verdict"; else echo NOT-TESTED > "$EV/case-04.verdict"; fi

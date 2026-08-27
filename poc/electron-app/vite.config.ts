@@ -6,8 +6,6 @@ import renderer from 'vite-plugin-electron-renderer';
 export default defineConfig({
   // Renderer source is its own Vite project root so its index.html builds flat to
   // dist/renderer/index.html (matching main.ts's path.join(__dirname, 'renderer/index.html')).
-  // Without this, Vite picks up the stale root-level index.html (pre-Vue3 "Nanobot" prototype)
-  // as the default entry and/or nests the output under dist/renderer/src/renderer/.
   root: 'src/renderer',
   plugins: [
     vue(),

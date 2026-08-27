@@ -114,7 +114,7 @@ recorded — exactly the discipline spec §17.3 demands ("禁止用代码审查�
 | # | Acceptance question | Answer | Backed by |
 |---|---|---|---|
 | 1 | Do two versioned DEBs build reproducibly? | **PASS** | case-01: real builds, both DEBs present, reproducible byte sizes |
-| 2 | Is the preload/IPC isolation correct (5 methods, no forbidden requires, no raw ipcRenderer)? | **PASS** | case-05: static + real run |
+| 2 | Is the preload/IPC isolation correct (5 methods, no forbidden requires, no raw ipcRenderer)? | **PASS** | case-05: static/code; runtime NOT-TESTED |
 | 3 | Does the update state machine + service pass the spec §18.1 suite? | **PASS (unit)** | Vitest, 40 tests passed — but this is test-suite PASS, not installed-app runtime PASS |
 | 4 | Are the runtime security invariants upheld (no `--no-sandbox`, no apt/dpkg in app args, signed APT, `/opt` perms, AppArmor enforce)? | **NOT-TESTED** | code/config conforms; runtime needs root install + running app |
 | 5 | Does the full update UX (check / optional / force / restart) work end-to-end on the installed app? | **NOT-TESTED** | needs root install + 4 GUI screenshots |

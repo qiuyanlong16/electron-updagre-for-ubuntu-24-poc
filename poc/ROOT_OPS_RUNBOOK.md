@@ -102,12 +102,14 @@ bash poc/tests-v2/case-04.sh
 > Note: `$(id -u)` must resolve inside `su`'s context (byclaw-testuser's uid) so the app can
 > reach the Wayland socket — keep it unescaped as shown.
 
-### Case 07 — AppArmor minimal profile enforces
+### Case 07 — AppArmor profile enforces (minimal, no dangerous caps)
 ```bash
-# (install chain step (c) already loaded the profile)
-sudo aa-status | grep -i byclaw > poc/evidence-v2/case-07-aa-status.txt
+# (install chain step (c) already loaded the profile with apparmor_parser -r.)
+# Capture the enforce/complain mode line for the byclaw binary path:
+sudo grep -F '/opt/lenovo/byclaw/byclaw' /sys/kernel/security/apparmor/profiles > poc/evidence-v2/case-07-mode.txt
 bash poc/tests-v2/case-07.sh
-# expects PASS: profile loaded + no dangerous capabilities (sys_admin/chroot/dac_read_search/setuid/setgid/fowner/chown).
+# expects PASS: profile in (enforce) mode + no dangerous capabilities
+# (sys_admin/chroot/dac_read_search/setuid/setgid/fowner/chown).
 ```
 
 ### Case 08 — APT signed + Signed-By (not trusted:yes)
