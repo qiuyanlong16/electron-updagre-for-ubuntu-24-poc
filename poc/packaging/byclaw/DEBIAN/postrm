@@ -4,4 +4,6 @@ if [ "$1" = "purge" ]; then
   rm -rf /var/lib/lenovo/byclaw /etc/lenovo/byclaw
   logger -t byclaw "Byclaw purged (system-side data removed; user data preserved)"
 fi
+# Refresh desktop database after the .desktop file is removed (remove + purge).
+update-desktop-database /usr/share/applications 2>/dev/null || true
 exit 0

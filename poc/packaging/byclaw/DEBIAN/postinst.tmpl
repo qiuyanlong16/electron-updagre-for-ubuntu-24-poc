@@ -11,6 +11,7 @@ chown root:root "${STATE_DIR}" "${MODELS_DIR}"
 
 # Atomic write of update-state.json (temp + mv), idempotent (spec §9.1)
 TMP="$(mktemp "${STATE_FILE}.XXXXXX")"
+trap 'rm -f "$TMP" 2>/dev/null' EXIT
 NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 cat > "${TMP}" <<EOF
 {

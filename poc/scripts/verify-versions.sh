@@ -4,7 +4,7 @@ VERSION="${1:?version}"
 DEB="${2:?deb}"
 POLICY="${3:?update-policy.json}"
 fail=0
-chk() { # <label> <actual>
+chk() { # <expected> <actual> <label>
   if [ "$2" = "$1" ]; then echo "  OK   $3 = $2"; else echo "  FAIL $3 = $2 (expected $1)"; fail=1; fi
 }
 echo "[verify] expected version: $VERSION"
@@ -20,7 +20,7 @@ chk "$VERSION" "$CTRL" "DEBIAN/control Version (#2)"
 # 3. postinst installedVersion (build-time proxy: the baked VERSION="X.Y.Z" literal from sed
 #    drives the runtime installedVersion "${VERSION}" in the heredoc; postinst lives in the
 #    control archive, not the filesystem archive — use --ctrl-tarfile + ./postinst)
-POSTINST="$(dpkg-deb --ctrl-tarfile "$DEB" 2>/dev/null | tar -xO ./postinst 2>/dev/null | grep -o '^VERSION="[^"]*"' | head -1 | sed 's/^VERSION="//;s/"$//' || true)"
+POSTINST="$(dpkg-deb --ctrl-tarfile "$DEB" 2>/dev/null | tar -xO ./postinst 2>/dev/null | grep -m1 -o '^VERSION="[^"]*"' | sed 's/^VERSION="//;s/"$//' || true)"
 chk "$VERSION" "$POSTINST" "postinst installedVersion (#3)"
 
 # 4. deb filename
@@ -33,5 +33,5 @@ chk "$VERSION" "$LATEST" "update-policy latestVersion (#5)"
 # 6. APT Packages index Version — only checkable after publish; here we skip with a note
 echo "  NOTE Packages-index (#6) verified post-publish by verify-versions.sh --published"
 
-[ $fail -eq 0 ] || { echo "[verify] FAILED"; exit 1; }
+[ "$fail" -eq 0 ] || { echo "[verify] FAILED"; exit 1; }
 echo "[verify] build-time checks OK"

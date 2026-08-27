@@ -15,5 +15,6 @@ def chunk(t,d):
 sig=b'\x89PNG\r\n\x1a\n'
 ihdr=struct.pack('>IIBBBBB',w,h,8,6,0,0,0)
 idat=zlib.compress(bytes(raw),9)
-open(out,'wb').write(sig+chunk(b'IHDR',ihdr)+chunk(b'IDAT',idat)+chunk(b'IEND',b''))
+with open(out,'wb') as f:
+    f.write(sig+chunk(b'IHDR',ihdr)+chunk(b'IDAT',idat)+chunk(b'IEND',b''))
 PY

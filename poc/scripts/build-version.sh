@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 VERSION="${1:?usage: build-version.sh <version> e.g. 1.0.0}"
+[[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "ERROR: bad version '$VERSION' (expected X.Y.Z)"; exit 1; }
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 APP="$ROOT/electron-app"
 PKG_DIR="$ROOT/packages"
@@ -48,8 +49,8 @@ chmod 0755 "$STAGE/DEBIAN/"{postinst,prerm,postrm}
 
 # perms: dirs 0755, files 0644, entry 0755 (chrome-sandbox stays 0755 NOT 4755) (spec §13.4, §16)
 find "$STAGE" -type d -exec chmod 0755 {} \;
-find "$STAGE/opt/lenovo/byclaw" -type f -exec chmod 0644 {} \;
-chmod 0755 "$STAGE/opt/lenovo/byclaw/byclaw" 2>/dev/null || true
+find "$STAGE" -path "$STAGE/DEBIAN" -prune -o -type f -exec chmod 0644 {} \;
+[ -f "$STAGE/opt/lenovo/byclaw/byclaw" ] && chmod 0755 "$STAGE/opt/lenovo/byclaw/byclaw"
 # chrome-sandbox explicitly NOT setuid
 [ -f "$STAGE/opt/lenovo/byclaw/chrome-sandbox" ] && chmod 0755 "$STAGE/opt/lenovo/byclaw/chrome-sandbox"
 
