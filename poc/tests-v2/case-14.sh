@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -uo pipefail; ROOT="$(cd "$(dirname "$0")/.." && pwd)"; EV="$ROOT/evidence-v2"
-bash "$ROOT/scripts/set-update-policy.sh optional 1.1.0"
+bash "$ROOT/scripts/set-update-policy.sh" optional 1.1.0
 # assert no apt/dpkg/systemctl in app process args (Electron/Vue/preload must NEVER invoke these — hard constraint)
-# scoped to byclaw/electron processes to avoid false-FAIL from background apt-daily/unattended-upgrade
-ps -eo args | grep -E 'byclaw|electron' | grep -v grep \
+# scoped to the byclaw app's processes (/opt/lenovo/byclaw) to avoid false-FAIL from other Electron
+# apps (stale nanobot, VS Code) and the test harness's own shell — only byclaw must not invoke root cmds
+ps -eo args | grep -F '/opt/lenovo/byclaw' | grep -v grep \
   | grep -E '\b(apt|apt-get|dpkg|dpkg-query|unattended-upgrade|systemctl)\b' > "$EV/case-14-noapt.txt" 2>/dev/null || true
 if [ -s "$EV/case-14-noapt.txt" ]; then
   cat "$EV/case-14-noapt.txt"
