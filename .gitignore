@@ -10,10 +10,11 @@ poc/electron-app/node_modules/
 
 # ─── GPG secrets & generated repository state ──────────────────────────────
 #  ⚠️  NEVER commit gpg-home/ — it contains the PRIVATE signing key.
-#  setup-repo.sh generates a fresh throwaway key pair on every run, so the
-#  keyring, aptly.conf and exported public key are all regenerated artifacts.
+#  setup-repo.sh idempotently generates the byclaw-poc key pair (kept in
+#  gpg-home/); the exported public key is regenerated per run. aptly.conf
+#  is now a COMMITTED static config (fixed rootDir) — do NOT ignore it.
 poc/apt-repository/gpg-home/
-poc/apt-repository/aptly.conf
+poc/apt-repository/byclaw-poc-public.gpg
 poc/apt-repository/nanobot-poc-public.gpg
 poc/apt-repository/.server.pid
 # aptly database + published repo + update-policy.json build artifact (regenerated
