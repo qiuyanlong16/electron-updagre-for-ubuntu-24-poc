@@ -38,9 +38,8 @@ bash scripts/publish-byclaw.sh 1.1.0         # publish 1.1.0 into the aptly repo
 bash scripts/serve-repo.sh                   # serve the repo on 127.0.0.1:8099 (already running)
 ```
 
-> The aptly pool is currently **empty** (`apt-repository/aptly-db/public/pool/b/byclaw/`),
-> so `publish-byclaw.sh` for both versions is required before Case 08/09/10/11 will work.
-> The http.server on `127.0.0.1:8099` (pid 272200) is already up.
+> Both versions are already published into the aptly pool (`apt-repository/aptly-db/public/pool/main/b/byclaw/`)
+> and served on `127.0.0.1:8099` (pid 272200). Re-run `publish-byclaw.sh` only if the repo was reset.
 
 ---
 
