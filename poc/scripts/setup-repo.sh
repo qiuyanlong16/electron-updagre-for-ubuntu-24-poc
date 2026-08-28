@@ -4,6 +4,12 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 REPO="$ROOT/apt-repository"
 CONF="$REPO/aptly.conf"
+# Generate aptly.conf from the template with absolute paths (spec §14.2/§14.4:
+# a fixed rootDir that does NOT depend on ${HOME} or a specific user path — any
+# clone path works; the committed config is the .tmpl, never a hardcoded path).
+sed -e "s|__APTLY_DB__|$REPO/aptly-db|" \
+    -e "s|__APTLY_PUBLIC__|$REPO/aptly-db/public|" \
+    "$REPO/aptly.conf.tmpl" > "$CONF"
 GNUPGHOME="$REPO/gpg-home"
 APTLY="aptly -config=$CONF"
 

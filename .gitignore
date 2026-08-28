@@ -11,9 +11,11 @@ poc/electron-app/node_modules/
 # ─── GPG secrets & generated repository state ──────────────────────────────
 #  ⚠️  NEVER commit gpg-home/ — it contains the PRIVATE signing key.
 #  setup-repo.sh idempotently generates the byclaw-poc key pair (kept in
-#  gpg-home/); the exported public key is regenerated per run. aptly.conf
-#  is now a COMMITTED static config (fixed rootDir) — do NOT ignore it.
+#  gpg-home/); the exported public key + aptly.conf are regenerated per run
+#  (aptly.conf is generated from aptly.conf.tmpl with the clone's absolute
+#  rootDir — spec §14.2/§14.4; never commit the generated file).
 poc/apt-repository/gpg-home/
+poc/apt-repository/aptly.conf
 poc/apt-repository/byclaw-poc-public.gpg
 poc/apt-repository/nanobot-poc-public.gpg
 poc/apt-repository/.server.pid
