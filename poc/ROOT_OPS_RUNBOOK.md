@@ -6,7 +6,7 @@
 > case scripts themselves) is already done. Estimated hands-on time: **~10–15 min** of
 > `sudo`, then re-run the case scripts to capture verdicts.
 >
-> **Status when this was written:** `feat/byclaw-vue3-redesign` branch, commit `73bca2e`.
+> **Status when this was written:** `feat/byclaw-vue3-redesign` branch, commit `84daa1b`.
 > Case-01 (build DEBs) and Case-05 (preload IPC isolation) already PASS under normal user.
 > All other cases are **NOT-TESTED** until the root + app steps below are run.
 
@@ -137,9 +137,8 @@ echo PASS > poc/evidence-v2/case-10.verdict
 ```
 
 ### Case 11 — app not running → upgrade → next launch is new version
-> ⚠️ **The case-11 script's echo is muddled** (it shows `sudo ./scripts/publish-byclaw.sh`).
-> `publish-byclaw.sh` is a **normal-user** aptly script — do **not** sudo it. Run it as
-> yourself. This runbook is authoritative; the script echo will be fixed in the final review.
+> `publish-byclaw.sh` is a **normal-user** aptly script — do **not** `sudo` it. The case-11
+> script echo (commit `3dc47a5`) already labels ROOT vs Normal steps; this runbook is authoritative.
 ```bash
 # (normal user) publish 1.1.0 into the repo:
 bash poc/scripts/publish-byclaw.sh 1.1.0
@@ -240,9 +239,6 @@ Once you have run the root steps above and re-run the case scripts, the verdicts
 output — unexecuted cases stay NOT-TESTED, never PASS).
 
 ## Notes
-- **case-11 script echo muddle** (`sudo ./scripts/publish-byclaw.sh`) — `publish-byclaw.sh` is a
-  normal-user aptly script. This runbook is authoritative; the script echo is queued for the final
-  review fix.
 - **No `NOPASSWD` / no `Trusted: yes`** anywhere; no password handling by the controller.
 - Root scripts reviewed but **not run** by the controller (root-access mode). Every verdict above
   that you do not actually run stays **NOT-TESTED**.
