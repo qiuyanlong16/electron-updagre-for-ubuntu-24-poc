@@ -1,0 +1,2 @@
+/home/qiuyanlong/worespace/by-claw-poc-linux/poc/electron-app/src/preload/preload.ts:contextBridge.exposeInMainWorld('byclawAPI', {
+method count: 5 (expect 5)

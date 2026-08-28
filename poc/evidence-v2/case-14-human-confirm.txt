@@ -1,0 +1,7 @@
+Operator (qiuyanlong) live observation while app running 1.1.0, policy latest=1.2.0 optional:
+- App showed an UPDATE_AVAILABLE toast: "found 1.2.0 version".
+- Operator clicked "I know" (我知道了).
+- Result: "nothing changed" — the app did NOT auto-download, auto-install, or invoke any
+  upgrade. It made no apt/dpkg/systemctl call (corroborated by case-14-noapt.txt = 0 hits).
+This is exactly the Case-14 spec behavior: new version not yet installed => app invokes no
+root command. Runtime ps evidence + human visual + screenshot case-14-update-available.png.

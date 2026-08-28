@@ -1,0 +1,5 @@
+XDG_SESSION_TYPE=wayland
+DISPLAY=:0
+scrot=available
+grim=missing
+captured=2026-08-27T15:30:52Z

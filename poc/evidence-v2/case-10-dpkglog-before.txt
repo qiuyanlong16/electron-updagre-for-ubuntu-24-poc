@@ -1,0 +1,5 @@
+2026-08-28 12:20:41 status half-configured hicolor-icon-theme:all 0.17-2
+2026-08-28 12:20:41 status installed hicolor-icon-theme:all 0.17-2
+2026-08-28 12:20:41 trigproc gnome-menus:amd64 3.36.0-1.1ubuntu3 <none>
+2026-08-28 12:20:41 status half-configured gnome-menus:amd64 3.36.0-1.1ubuntu3
+2026-08-28 12:20:41 status installed gnome-menus:amd64 3.36.0-1.1ubuntu3

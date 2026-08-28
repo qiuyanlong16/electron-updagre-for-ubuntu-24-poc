@@ -1,0 +1,1 @@
+case-13: deferred — app not installed (/opt/lenovo/byclaw missing; needs sudo dpkg -i). GUI screenshot skipped to avoid capturing the desktop without the app; run case-13 after the root install.
