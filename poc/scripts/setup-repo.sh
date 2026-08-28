@@ -25,7 +25,9 @@ fi
 GPG_KEY="$(GNUPGHOME="$GNUPGHOME" gpg --list-keys --with-colons byclaw-poc@localhost | grep '^fpr' | head -1 | cut -d: -f10)"
 [ -n "$GPG_KEY" ] || { echo "ERROR: no GPG key"; exit 1; }
 export GNUPGHOME GPG_KEY
-GNUPGHOME="$GNUPGHOME" gpg --armor --export byclaw-poc@localhost > "$REPO/byclaw-poc-public.gpg"
+# Binary keybox (NOT --armor): apt's Signed-By keyring must be binary; an ASCII-armored
+# file makes apt emit "NO_PUBKEY" / "invalid packet (ctb=2d)" (Case 08, spec §14.2).
+GNUPGHOME="$GNUPGHOME" gpg --export byclaw-poc@localhost > "$REPO/byclaw-poc-public.gpg"
 
 # aptly repo (fixed normal user only; no || true; nonzero exit on failure) (spec §14.1, §14.3)
 if ! $APTLY repo show byclaw-poc >/dev/null 2>&1; then
