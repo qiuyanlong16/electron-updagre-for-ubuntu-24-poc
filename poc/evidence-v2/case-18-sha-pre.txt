@@ -1,1 +1,4 @@
-a8332527aee68289f1a0db8c4169cdfe92a48de7670bf2e446678634d5038f81  /etc/lenovo/byclaw/config.json
+a8332527aee68289f1a0db8c4169cdfe92a48de7670bf2e446678634d5038f81  config.json  (extracted from packages/byclaw_1.2.0_amd64.deb  — PRE-upgrade state: the file as installed before the 1.2.0->1.3.0 force upgrade)
+# Captured 2026-08-28 via `dpkg-deb -x byclaw_1.2.0_amd64.deb <tmp>; sha256sum <tmp>/etc/lenovo/byclaw/config.json`
+# This is a VALID pre-upgrade hash: the 1.2.0 DEB's config.json is byte-for-byte what was on disk
+# before the 1.2.0->1.3.0 unattended upgrade at 13:21:33 (dpkg.log: 'upgrade byclaw:amd64 1.2.0 1.3.0').

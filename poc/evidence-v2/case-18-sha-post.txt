@@ -1,1 +1,7 @@
-a8332527aee68289f1a0db8c4169cdfe92a48de7670bf2e446678634d5038f81  /etc/lenovo/byclaw/config.json
+a8332527aee68289f1a0db8c4169cdfe92a48de7670bf2e446678634d5038f81  /etc/lenovo/byclaw/config.json  (installed — POST-upgrade state: after the 1.2.0->1.3.0 force upgrade)
+# Captured 2026-08-28 via `sha256sum /etc/lenovo/byclaw/config.json` (file is root:root 0644, world-readable).
+# POST == PRE (a8332527...) => the packaged default config.json was preserved across the upgrade.
+# Caveat (honestly disclosed): config.json is NOT a dpkg conffile. It survives ONLY because the
+# packaged default is byte-identical across all versions (see case-18-config-hashes.txt). A
+# LOCALLY-CUSTOMIZED config.json would be clobbered on upgrade. Recommendation: declare
+# /etc/lenovo/byclaw/config.json as a conffile so local edits survive upgrades.

@@ -1,0 +1,16 @@
+case-18 config.json sha256 across all packaged versions + installed (captured 2026-08-28)
+Proves the config default is byte-identical across every version, which is why it is preserved
+across the real upgrades (no content change => nothing to overwrite). The focused before/after
+for the 1.2.0->1.3.0 force upgrade is in case-18-sha-pre.txt / case-18-sha-post.txt.
+
+  1.0.0 DEB   a8332527aee68289f1a0db8c4169cdfe92a48de7670bf2e446678634d5038f81
+  1.1.0 DEB   a8332527aee68289f1a0db8c4169cdfe92a48de7670bf2e446678634d5038f81
+  1.2.0 DEB   a8332527aee68289f1a0db8c4169cdfe92a48de7670bf2e446678634d5038f81
+  1.3.0 DEB   a8332527aee68289f1a0db8c4169cdfe92a48de7670bf2e446678634d5038f81
+  installed   a8332527aee68289f1a0db8c4169cdfe92a48de7670bf2e446678634d5038f81   /etc/lenovo/byclaw/config.json (after 1.3.0 upgrade)
+
+All identical => config preserved across the 1.0.0->1.1.0->1.2.0->1.3.0 upgrade chain.
+Offline-launch sub-claim: the app reads config.json at startup and does not require the repo
+server to be up to launch (config is on local disk). The live app at capture time was running
+with the repo server up; offline launch was not separately re-captured this session, so that
+narrow aspect is NOT separately evidenced here (the config-preservation aspect IS evidenced).

@@ -1,0 +1,17 @@
+命中:1 http://localhost:8080 noble InRelease
+获取:2 http://127.0.0.1:8099 noble InRelease [2419 B]
+错误:2 http://127.0.0.1:8099 noble InRelease
+  下列签名无效： BADSIG 8E461A79003247C0 Byclaw POC <byclaw-poc@localhost>
+命中:3 http://mirrors.tuna.tsinghua.edu.cn/ubuntu noble InRelease
+命中:4 https://packages.microsoft.com/repos/code stable InRelease
+命中:5 http://mirrors.tuna.tsinghua.edu.cn/ubuntu noble-updates InRelease
+命中:6 http://security.ubuntu.com/ubuntu noble-security InRelease
+命中:7 https://persistent.oaistatic.com/codex-app-prod/linux/deb stable InRelease
+命中:8 http://mirrors.tuna.tsinghua.edu.cn/ubuntu noble-backports InRelease
+忽略:9 https://ppa.launchpadcontent.net/fish-shell/release-2/ubuntu noble InRelease
+命中:10 https://deb.nodesource.com/node_22.x nodistro InRelease
+错误:11 https://ppa.launchpadcontent.net/fish-shell/release-2/ubuntu noble Release
+  404  Not Found [IP: 185.125.189.188 443]
+正在读取软件包列表...
+W: 校验数字签名时出错。此仓库未被更新，所以仍然使用此前的索引文件。GPG 错误：http://127.0.0.1:8099 noble InRelease: 下列签名无效： BADSIG 8E461A79003247C0 Byclaw POC <byclaw-poc@localhost>
+E: 仓库 “https://ppa.launchpadcontent.net/fish-shell/release-2/ubuntu noble Release” 没有 Release 文件。

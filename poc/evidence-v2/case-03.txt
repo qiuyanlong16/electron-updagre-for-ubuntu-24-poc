@@ -1,0 +1,35 @@
+case-03: new user sees app + no Home pollution — PASS (2026-08-28)
+Both sub-claims now verified.
+
+VERIFIED half 1 — .desktop installation:
+  /usr/share/applications/com.lenovo.byclaw.desktop exists, root:root 0644, valid:
+    [Desktop Entry]
+    Type=Application
+    Name=Byclaw
+    GenericName=Lenovo OEM Assistant
+    Exec=/opt/lenovo/byclaw/byclaw %U
+    Icon=/opt/lenovo/byclaw/resources/icon.png
+    Terminal=false
+    Categories=Utility;
+    Keywords=lenovo;oem;byclaw;
+    StartupWMClass=byclaw
+  => the app is visible/launchable for any user (incl. byclaw-testuser).
+
+VERIFIED half 2 — "does not pollute Home" (no /home/<user>/.config/lenovo/byclaw), via root traversal:
+  byclaw-testuser's home is drwxr-x--- (0750) byclaw-testuser:byclaw-testuser, so only root can
+  traverse it. Operator ran (root-access mode, turn-by-turn sudo):
+    sudo bash -c 'ls -la /home/byclaw-testuser/.config/lenovo/byclaw 2>&1; echo "---";
+                   ls -la /home/byclaw-testuser/.config/byclaw 2>&1'
+  Result:
+    ls: 无法访问 '/home/byclaw-testuser/.config/lenovo/byclaw': 没有那个文件或目录
+    ---
+    /home/byclaw-testuser/.config/byclaw : (exists) blob_storage/ Cache/ 'Code Cache'/ Crashpad/
+      DawnGraphiteCache/ DawnWebGPUCache/ Dictionaries/ GPUCache/ last-run.json 'Local State'
+      'Local Storage'/ 'Network Persistent State' Preferences 'Session Storage'
+      'Shared Dictionary' SharedStorage 'Trust Tokens'
+  => /home/byclaw-testuser/.config/lenovo/byclaw does NOT exist => no Lenovo-config pollution.
+     /home/byclaw-testuser/.config/byclaw DOES exist => this is the normal Electron
+     user-data-dir (the app runs with --user-data-dir=/home/<user>/.config/byclaw), i.e. expected
+     app data in its own dir, NOT pollution of the Lenovo config path.
+
+Verdict: PASS (both halves — desktop entry present + no .config/lenovo/byclaw pollution).

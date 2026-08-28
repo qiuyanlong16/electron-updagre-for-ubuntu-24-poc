@@ -1,0 +1,4 @@
+configure byclaw:amd64
+trigproc desktop-file-utils:amd64
+trigproc gnome-menus:amd64
+upgrade byclaw:amd64

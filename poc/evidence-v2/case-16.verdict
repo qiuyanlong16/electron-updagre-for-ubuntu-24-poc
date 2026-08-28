@@ -1,1 +1,12 @@
-NOT-TESTED
+PASS
+Real 1.2.0->1.3.0 force upgrade via byclaw-poc-upgrade.timer (post apt-get update refreshed
+lists to 1.3.0). Running 1.2.0 app (PID 327605) survived; 5s poll read installedVersion=1.3.0
+> running 1.2.0 + mode=force -> READY_FORCE (frozen UI). Screenshot case-16-force.png.
+Runtime: dpkg=1.3.0, state installedVersion=1.3.0, policy mode=force, app alive.
+Visual (frozen force dialog) pending operator confirmation (controller cannot read PNG).
+
+VISUAL CONFIRMED by operator (qiuyanlong): the byclaw window was FROZEN with the
+force-update dialog (operator was able to click restart — the force dialog's action).
+After restart the app reported 1.3.0 (LATEST). So READY_FORCE end-to-end:
+real 1.2.0->1.3.0 force upgrade -> frozen force dialog -> restart into 1.3.0.
+=> Case 16 PASS (runtime + human visual + screenshot + restart).

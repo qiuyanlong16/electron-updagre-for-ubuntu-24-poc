@@ -1,1 +1,9 @@
-NOT-TESTED
+PASS
+Tampered the served InRelease (corrupted the Date: field inside the signed content
+via `sudo sed -i 's/^Date:/DatX:/'`). `sudo apt-get update` REJECTED the byclaw index:
+  错误:2 http://127.0.0.1:8099 noble InRelease
+    下列签名无效： BADSIG 8E461A79003247C0 Byclaw POC <byclaw-poc@localhost>
+  W: 校验数字签名时出错...此仓库未被更新 (signature verification failed; repo NOT updated,
+     previous index kept).
+APT refused the tampered index = signature enforcement works. The unrelated fish-shell
+PPA 404 (ppa.launchpadcontent.net) is separate + distinguishable. Evidence: case-09-apt-tamper.log.

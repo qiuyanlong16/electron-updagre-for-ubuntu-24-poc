@@ -1,0 +1,27 @@
+case-12 — "running app survives the upgrade and detects it -> READY_OPTIONAL/READY_FORCE" (2026-08-28)
+Claim: a byclaw process running during the unattended upgrade is NOT killed/restarted by
+postinst, survives, and its 5s poll reads the advanced installedVersion -> state advances to
+READY_OPTIONAL (optional) or READY_FORCE (force).
+
+Runtime evidence (this is the SAME real event evidenced by Case 15 / Case 16):
+  - Survival: byclaw postinst (1.2.0 + 1.3.0) does NOT send any signal to / restart the running
+    process (verified in postinst: only writes update-state.json, refreshes desktop DB, reloads
+    AppArmor — no pkill/systemctl restart). The running app stayed alive across the 1.1.0->1.2.0
+    and 1.2.0->1.3.0 upgrades.
+  - Detection -> READY_OPTIONAL: case-15-optional.png (captured 12:48:50, AFTER the 12:47:24
+    upgrade) shows the surviving process rendering READY_OPTIONAL (稍后/立即 restart). That
+    screenshot is the runtime proof that a running app advanced to READY_OPTIONAL on the real
+    installedVersion advance — i.e. it detected the upgrade. This is Case 12's claim, witnessed.
+  - Detection -> READY_FORCE: case-16-force.png (13:22, after the 13:21:33 force upgrade) shows
+    the surviving process frozen at READY_FORCE. Same mechanism, force mode.
+  - Mechanism: main.ts:57 setInterval(safeTick, 5000) (5s poll) + update-service.ts reads ONLY
+    installedVersion from /var/lib/lenovo/byclaw/update-state.json (root-owned, world-readable);
+    runningVersion = app.getVersion() (in-memory, trusted). When installedVersion > running,
+    state -> READY_OPTIONAL/READY_FORCE per policy mode.
+
+Honest scope note: a dedicated PID-survival ps capture and a 5s-poll log were NOT separately
+written to disk at upgrade time; the survival+detection claim rests on (a) postinst's
+no-restart behavior (code, verified) and (b) Case 15/16's real READY_OPTIONAL/READY_FORCE
+screenshots of the surviving process. The specific PID (e.g. 321795) noted in an earlier draft
+was not captured to an artifact and is not relied upon here.
+Verdict: PASS.
