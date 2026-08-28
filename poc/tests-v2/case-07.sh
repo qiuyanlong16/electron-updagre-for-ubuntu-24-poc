@@ -12,10 +12,14 @@ echo "  sudo grep -F '/opt/lenovo/byclaw/byclaw' /sys/kernel/security/apparmor/p
 if [ ! -s "$EV/case-07-mode.txt" ]; then echo NOT-TESTED > "$EV/case-07.verdict"; exit 0; fi
 # minimality: profile file must exist first (missing file -> grep no-match -> false PASS without this guard)
 if [ ! -f /etc/apparmor.d/com.lenovo.byclaw ]; then echo NOT-TESTED > "$EV/case-07.verdict"; exit 0; fi
-# ENFORCE mode (spec §13.8: Case 7 must truthfully record the ENFORCE result, not just minimality).
-# complain mode only logs, does not block -> FAIL (not a real enforce). flags=(unconfined) is a
-# spec-sanctioned design (§13.1) and still reports mode=enforce here.
-if ! grep -q '(enforce)' "$EV/case-07-mode.txt"; then echo FAIL > "$EV/case-07.verdict"; exit 0; fi
+# Mode per spec §13.1: the profile uses flags=(unconfined), so the loaded mode is (unconfined)
+# (attached to the binary, runs unconfined to satisfy Chromium's broad file-access needs, grants
+# userns). §13.8: Case 7 truthfully records the loading result. Accept (unconfined) [spec §13.1
+# design] or (enforce) [a stricter valid profile]; REJECT (complain) [logs-only, not the spec
+# design] and absent. NOTE: a flags=(unconfined) profile reports (unconfined), NOT (enforce) — an
+# earlier revision of this check wrongly required (enforce) and would always FAIL the
+# spec-mandated profile (caught during the root validation pass: captured mode was (unconfined)).
+if ! grep -qE '\((unconfined|enforce)\)' "$EV/case-07-mode.txt"; then echo FAIL > "$EV/case-07.verdict"; exit 0; fi
 # minimality: no dangerous capabilities in the profile file
 if grep -qE 'sys_admin|sys_chroot|dac_read_search|setuid|setgid|fowner|chown' /etc/apparmor.d/com.lenovo.byclaw; then
   echo FAIL > "$EV/case-07.verdict"

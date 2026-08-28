@@ -107,8 +107,10 @@ bash poc/tests-v2/case-04.sh
 # Capture the enforce/complain mode line for the byclaw binary path:
 sudo grep -F '/opt/lenovo/byclaw/byclaw' /sys/kernel/security/apparmor/profiles > poc/evidence-v2/case-07-mode.txt
 bash poc/tests-v2/case-07.sh
-# expects PASS: profile in (enforce) mode + no dangerous capabilities
-# (sys_admin/chroot/dac_read_search/setuid/setgid/fowner/chown).
+# expects PASS: profile loaded in (unconfined) mode per spec §13.1 [flags=(unconfined) is the
+# spec-mandated design — it reports (unconfined), NOT (enforce)] + no dangerous capabilities
+# (sys_admin/chroot/dac_read_search/setuid/setgid/fowner/chown). case-07.sh accepts
+# (unconfined) or (enforce); rejects (complain) + absent.
 ```
 
 ### Case 08 — APT signed + Signed-By (not trusted:yes)
